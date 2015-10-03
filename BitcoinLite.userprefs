@@ -1,0 +1,13 @@
+﻿<Properties StartupItem="BitcoinLite\BitcoinLite.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="BitcoinLite\Crypto\ECDSASignature.cs">
+    <Files>
+      <File FileName="BitcoinLite\Crypto\ECCurve.cs" Line="14" Column="35" />
+      <File FileName="BitcoinLite\Crypto\ECDSASignature.cs" Line="14" Column="3" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
