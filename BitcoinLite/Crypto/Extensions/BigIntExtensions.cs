@@ -23,10 +23,7 @@ namespace BitcoinLite.Crypto
 				y = t;
 			}
 
-			if (y < 0)
-				return y + p;
-			//else
-			return y;
+			return y < 0 ? y + p : y;
 		}
 
 		public static byte[] ToUByteArray(this BigInteger i)

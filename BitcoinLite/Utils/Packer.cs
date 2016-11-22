@@ -261,7 +261,7 @@ namespace BitcoinLite.Utils
 		//   [N]  For numbers larger than 9, use brackets, for example [20]
 		//   *    Repeat the next data type until the arguments are exhausted
 		//
-		static public byte[] Pack(string description, params object[] args)
+		public static byte[] Pack(string description, params object[] args)
 		{
 			int argn = 0;
 			var b = new PackContext();

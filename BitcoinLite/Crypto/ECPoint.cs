@@ -6,7 +6,7 @@ namespace BitcoinLite.Crypto
 {
 	public class ECPoint : IEquatable<ECPoint>
 	{
-		public readonly static ECPoint Infinity = new ECPoint();
+		public static readonly ECPoint Infinity = new ECPoint();
 		private readonly bool _isInfinity;
 		private readonly BigInteger _x;
 		private readonly BigInteger _y;
@@ -32,20 +32,11 @@ namespace BitcoinLite.Crypto
 			_isInfinity = y.IsZero && x.IsZero;
 		}
 
-		public BigInteger X
-		{
-			get { return _x; }
-		}
+		public BigInteger X => _x;
 
-		public BigInteger Y
-		{
-			get { return _y; }
-		}
+		public BigInteger Y => _y;
 
-		public bool IsInfinity
-		{
-			get { return _isInfinity; }
-		}
+		public bool IsInfinity => _isInfinity;
 
 		public byte[] Encode(bool compressed)
 		{
@@ -71,10 +62,25 @@ namespace BitcoinLite.Crypto
 			return encoded;
 		}
 
+		internal static bool IsCanonical(byte[] encoded)
+		{
+			var prefix = encoded[0];
+			switch (prefix)
+			{
+				case CompressedEvenPrefix:
+				case CompressedOddPrefix:
+					return encoded.Length == CompressedBytesLen;
+				case UncompressedPrefix:
+					return encoded.Length == UncompressedBytesLen;
+			}
+
+			return false;
+		}
+
 		public static ECPoint Decode(byte[] encoded)
 		{
 			if (encoded == null || encoded.Length < 1)
-				throw new ArgumentNullException("encoded");
+				throw new ArgumentNullException(nameof(encoded));
 
 			var prefix = encoded[0];
 			var isInfinity = encoded.Length == InfinityBytesLen && prefix == InfinityPrefix;
@@ -195,7 +201,7 @@ namespace BitcoinLite.Crypto
 		{
 			unchecked
 			{
-				int hashCode = _isInfinity.GetHashCode();
+				var hashCode = _isInfinity.GetHashCode();
 				hashCode = (hashCode * 397) ^ _x.GetHashCode();
 				hashCode = (hashCode * 397) ^ _y.GetHashCode();
 				return hashCode;
@@ -214,7 +220,7 @@ namespace BitcoinLite.Crypto
 
 		public override string ToString()
 		{
-			return string.Format("X={0}, Y={1}", _x.ToString("x2"), _y.ToString("x2"));
+			return $"X={_x.ToString("x2")}, Y={_y.ToString("x2")}";
 		}
 	}
 }

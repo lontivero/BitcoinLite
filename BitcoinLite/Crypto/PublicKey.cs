@@ -18,10 +18,7 @@ namespace BitcoinLite.Crypto
 		{
 		}
 
-		public byte[] Hash
-		{
-			get { return _pubKeyHash ?? (_pubKeyHash = Hashes.RIPEMD160(Hashes.SHA256(_key))); }
-		}
+		public byte[] Hash => _pubKeyHash ?? (_pubKeyHash = Hashes.RIPEMD160(Hashes.SHA256(_key)));
 
 		public Address ToAddress(Network network)
 		{
@@ -33,20 +30,16 @@ namespace BitcoinLite.Crypto
 			return _key.SafeSubarray(0);
 		}
 
-		public ECPoint Point
-		{
-			get { return ECPoint.Decode(_key); }
-		}
+		public ECPoint Point => ECPoint.Decode(_key);
 
-		public Script ScriptPubKey
-		{
-			get { return Script.FromPubKey(this); }
-		}
+		public Script ScriptPubKey => Script.FromPubKey(this);
 
 		public bool Verify(byte[] data, ECDSASignature signature)
 		{
 			return ECDsaSigner.VerifySignature(data, signature, this);
 		}
+
+		public bool IsCaononical => ECPoint.IsCanonical(_key);
 
 		public override string ToString()
 		{
@@ -56,6 +49,6 @@ namespace BitcoinLite.Crypto
 		public string ToString(Network network)
 		{
 			return Base58Data.ToString(ToByteArray(), DataTypePrefix.PrivateKey, network);
-		}	
+		}
 	}
 }

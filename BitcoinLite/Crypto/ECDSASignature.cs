@@ -1,16 +1,15 @@
 ﻿using System.Numerics;
 using System;
-using System.IO;
 using BitcoinLite.Utils;
 
 namespace BitcoinLite.Crypto
 {
 	public class ECDSASignature
 	{
-		private readonly static BigInteger HalfCurveOrder = (Secp256k1.N >> 1);
+		private static readonly BigInteger HalfCurveOrder = (Secp256k1.N >> 1);
 
-		public BigInteger R { get; private set; }
-		public BigInteger S { get; private set; }
+		public BigInteger R { get; }
+		public BigInteger S { get; }
 
 		public ECDSASignature(BigInteger r, BigInteger s)
 		{

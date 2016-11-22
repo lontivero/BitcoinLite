@@ -10,8 +10,7 @@ namespace BitcoinLite.Encoding
 
 		public override string Encode(byte[] data, int offset, int count)
 		{
-			if (data == null)
-				throw new ArgumentNullException("data");
+			Guard.NotNull(nameof(data), data);
 
 			var pos = 0;
 			var s = new char[2 * count];
@@ -26,8 +25,7 @@ namespace BitcoinLite.Encoding
 
 		public override byte[] Decode(string encoded)
 		{
-			if (encoded == null)
-				throw new ArgumentNullException("encoded");
+			Guard.NotNull(nameof(encoded), encoded);
 			if (encoded.Length % 2 == 1)
 				throw new FormatException("Invalid Hex String");
 
@@ -52,7 +50,7 @@ namespace BitcoinLite.Encoding
 
 			var max = hexDigits.Max();
 			HexValueArray = new int[max + 1];
-			for (int i = 0; i < HexValueArray.Length; i++)
+			for (var i = 0; i < HexValueArray.Length; i++)
 			{
 				var idx = Array.IndexOf(hexDigits, (char)i);
 				var value = -1;

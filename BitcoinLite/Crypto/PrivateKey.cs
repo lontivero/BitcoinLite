@@ -70,7 +70,7 @@ namespace BitcoinLite.Crypto
 		public Key(byte[] key, bool compressed)
 		{
 			if(key.Length != 32)
-				throw new ArgumentException("private key must be a 32 bytes length array", "key");
+				throw new ArgumentException("private key must be a 32 bytes length array", nameof(key));
 			_isCompressed = compressed;
 			CheckValidKey(key);
 
@@ -84,20 +84,11 @@ namespace BitcoinLite.Crypto
 				throw new ArgumentException("Invalid key");
 		}
 
-		public bool IsCompressed
-		{
-			get { return _isCompressed; }
-		}
+		public bool IsCompressed => _isCompressed;
 
-		public PublicKey PublicKey
-		{
-			get { return _pubKey ?? (_pubKey = new PublicKey(PublicPoint, IsCompressed)); }
-		}
+		public PublicKey PublicKey => _pubKey ?? (_pubKey = new PublicKey(PublicPoint, IsCompressed));
 
-		internal ECPoint PublicPoint
-		{
-			get { return K * Secp256k1.G; }
-		}
+		internal ECPoint PublicPoint => K * Secp256k1.G;
 
 		internal BigInteger K
 		{
