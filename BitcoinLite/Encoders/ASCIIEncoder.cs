@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Linq;
+using BitcoinLite.Utils;
 
 namespace BitcoinLite.Encoding
 {
 	public class ASCIIEncoder : Encoder
 	{
-		//Do not using Encoding.ASCII (not portable)
-		public override byte[] Decode(string encoded)
+		public override byte[] GetBytes(string encoded)
 		{
-			if(String.IsNullOrEmpty(encoded))
-				return new byte[0];
+			if(string.IsNullOrEmpty(encoded))
+				return ByteArray.Empty;
 			return encoded.ToCharArray().Select(o => (byte)o).ToArray();
 		}
 
-		public override string Encode(byte[] data, int offset, int count)
+		public override string GetString(byte[] data, int offset, int count)
 		{
-			return new String(data.Skip(offset).Take(count).Select(o => (char)o).ToArray()).Replace("\0", "");
+			return new string(data.Skip(offset).Take(count).Select(o => (char)o).ToArray()).Replace("\0", "");
 		}
 	}
 }

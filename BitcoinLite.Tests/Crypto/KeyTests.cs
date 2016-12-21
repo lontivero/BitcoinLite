@@ -1,5 +1,6 @@
 ﻿using System;
 using BitcoinLite.Crypto;
+using BitcoinLite.Encoding;
 using NUnit.Framework;
 
 namespace BitcoinLite.Tests.Crypto
@@ -7,8 +8,8 @@ namespace BitcoinLite.Tests.Crypto
 	[TestFixture(Category = "Crypto")]
 	public class KeyTests
 	{
-		[TestCase("", TestName = "PrivateKey - Invalid")]
-		[TestCase("00", TestName = "PrivateKey - Invalid")]
+		[TestCase(    "", TestName = "PrivateKey - Invalid")]
+		[TestCase(  "00", TestName = "PrivateKey - Invalid")]
 		[TestCase("FFFF", TestName = "PrivateKey - Invalid")]
 		public void InvalidKeyLength(string s)
 		{
@@ -70,22 +71,29 @@ namespace BitcoinLite.Tests.Crypto
 			foreach (var test in tests)
 			{
 				var privateKey = Key.Parse(test.PrivateKeyWIF);
-				Assert.AreEqual(test.PubKey, privateKey.PublicKey.ToString());
+				Assert.AreEqual(test.PubKey, privateKey.PubKey.ToString());
+				Assert.AreEqual(Encoders.Hex.GetString(Base58Data.FromString(test.PrivateKeyWIF)), privateKey.ToString());
 
 				var address = Address.FromString(test.Address);
-				Assert.AreEqual(test.Hash160, address.PubKeyHash.ToHex());
-				Assert.AreEqual(test.Hash160, privateKey.PublicKey.Hash.ToHex());
-				Assert.AreEqual(address.PubKeyHash, privateKey.PublicKey.ToAddress(Network.Main).PubKeyHash);
+				Assert.AreEqual(KeyId.Parse(test.Hash160), address.Destination);
+				Assert.AreEqual(KeyId.Parse(test.Hash160), privateKey.PubKey.Hash);
+				Assert.AreEqual(address.ScriptPubKey.ToString(), privateKey.PubKey.ToAddress(Network.Main).ScriptPubKey.ToString());
+				Assert.True(privateKey.PubKey.IsCanonical);
+				Assert.AreEqual(test.Address, privateKey.PubKey.ToString(Network.Main));
+				Assert.AreEqual(address.Destination.ScriptPubKey.ToString(), privateKey.PubKey.Hash.ScriptPubKey.ToString());
+				Assert.AreEqual(address.Destination.ScriptPubKey.ToString(), new KeyId(privateKey.PubKey).ScriptPubKey.ToString());
 
 				var compressedPrivKey = new Key(privateKey.ToByteArray(), true);
-
 				Assert.AreEqual(test.CompressedPrivateKeyWIF, compressedPrivKey.ToString(Network.Main));
-				Assert.AreEqual(test.CompressedPubKey, compressedPrivKey.PublicKey.ToString());
-				//Assert.True(compressedPrivKey.PublicKey.IsCompressed);
+				Assert.AreEqual(test.CompressedPubKey, compressedPrivKey.PubKey.ToString());
+				// Assert.True(compressedPrivKey.PubKey.IsCompressed);
+				Assert.True(compressedPrivKey.PubKey.IsCanonical);
+				Assert.AreEqual(test.CompressedAddress, compressedPrivKey.PubKey.ToString(Network.Main));
 
 				var compressedAddr = Address.FromString(test.CompressedAddress);
-				Assert.AreEqual(test.CompressedHash160, compressedAddr.PubKeyHash.ToHex());
-				Assert.AreEqual(test.CompressedHash160, compressedPrivKey.PublicKey.Hash.ToHex());
+				Assert.AreEqual(KeyId.Parse(test.CompressedHash160), compressedAddr.Destination);
+				Assert.AreEqual(KeyId.Parse(test.CompressedHash160), compressedPrivKey.PubKey.Hash);
+				Assert.AreEqual(compressedAddr.Destination.ScriptPubKey.ToString(), compressedPrivKey.PubKey.Hash.ScriptPubKey.ToString());
 			}
 		}
 	}

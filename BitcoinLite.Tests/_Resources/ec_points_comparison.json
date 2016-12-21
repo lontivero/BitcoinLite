@@ -1,0 +1,52 @@
+﻿[
+	// if P = ∞  and Q = ∞ then P = Q
+	[
+		"0",
+		"0",
+		"0",
+		"0",
+		true,
+		"Two points at infinity are equal"
+	],
+
+	// if P <> ∞  and Q = ∞ then P <> Q
+	[
+		"d74bf844b0862475103d96a611cf2d898447e288d34b360bc885cb8ce7c00575",
+		"131c670d414c4546b88ac3ff664611b1c38ceb1c21d76369d7a7a0969d61d97d",
+		"0",
+		"0",
+		false,
+		"Infinity (right) is not equal to any other point"
+	],
+
+	// if P = ∞  and Q <> ∞ then P <> Q
+	[
+		"0",
+		"0",
+		"d74bf844b0862475103d96a611cf2d898447e288d34b360bc885cb8ce7c00575",
+		"131c670d414c4546b88ac3ff664611b1c38ceb1c21d76369d7a7a0969d61d97d",
+		false,
+		"Infinity (left) is not equal to any other point"
+	],
+
+
+	// if P is ECPoint and Q isnt ECPoint then P <> Q
+	[
+		"d74bf844b0862475103d96a611cf2d898447e288d34b360bc885cb8ce7c00575",
+		"131c670d414c4546b88ac3ff664611b1c38ceb1c21d76369d7a7a0969d61d97d",
+		null,
+		null,
+		false,
+		"Point comparison only supported for ECPoint instances"
+	],
+
+	// if P = (Xp, Yp), Q = (Xq, Yq) and Xp = Xq and Yp = Yq then P = Q
+	[
+		"d74bf844b0862475103d96a611cf2d898447e288d34b360bc885cb8ce7c00575",
+		"131c670d414c4546b88ac3ff664611b1c38ceb1c21d76369d7a7a0969d61d97d",
+		"d74bf844b0862475103d96a611cf2d898447e288d34b360bc885cb8ce7c00575",
+		"131c670d414c4546b88ac3ff664611b1c38ceb1c21d76369d7a7a0969d61d97d",
+		true,
+		"Points are equal"
+	]
+]

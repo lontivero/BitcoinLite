@@ -31,26 +31,26 @@ namespace BitcoinLite.Tests.Encoding
 		[Test, TestCaseSource("DataSet")]
 		public void Encode(string data, string encoded)
 		{
-			var testBytes = Encoders.Hex.Decode(data);
-			Assert.AreEqual(encoded, Encoders.Base58.Encode(testBytes));
+			var testBytes = Encoders.Hex.GetBytes(data);
+			Assert.AreEqual(encoded, Encoders.Base58.GetString(testBytes));
 		}
 
-		[Test, TestCaseSource("DataSet")]
+		[Test, TestCaseSource(nameof(DataSet))]
 		public void Decode(string data, string encoded)
 		{
-			var testBytes = Encoders.Base58.Decode(encoded);
-			CollectionAssert.AreEqual(Encoders.Hex.Decode(data), testBytes);
+			var testBytes = Encoders.Base58.GetBytes(encoded);
+			CollectionAssert.AreEqual(Encoders.Hex.GetBytes(data), testBytes);
 		}
 
 		[Test]
 		public void ShouldThrowFormatExceptionOnInvalidBase58()
 		{
-			Assert.Throws<FormatException>(() => Encoders.Base58.Decode("invalid"));
-			Assert.DoesNotThrow(() => Encoders.Base58.Decode(" "));
+			Assert.Throws<FormatException>(() => Encoders.Base58.GetBytes("invalid"));
+			Assert.DoesNotThrow(() => Encoders.Base58.GetBytes(" "));
 
-			Assert.Throws<FormatException>(() => Encoders.Base58.Decode(" \t\n\v\f\r skip \r\f\v\n\t a"));
-			var result = Encoders.Base58.Decode(" \t\n\v\f\r skip \r\f\v\n\t ");
-			var expected2 = Encoders.Hex.Decode("971a55");
+			Assert.Throws<FormatException>(() => Encoders.Base58.GetBytes(" \t\n\v\f\r skip \r\f\v\n\t a"));
+			var result = Encoders.Base58.GetBytes(" \t\n\v\f\r skip \r\f\v\n\t ");
+			var expected2 = Encoders.Hex.GetBytes("971a55");
 			CollectionAssert.AreEqual(result, expected2);
 		}
 	}

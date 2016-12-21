@@ -79,8 +79,8 @@ namespace BitcoinLite.Crypto
 
 		public static ECPoint Decode(byte[] encoded)
 		{
-			if (encoded == null || encoded.Length < 1)
-				throw new ArgumentNullException(nameof(encoded));
+			Ensure.NotNull(nameof(encoded), encoded);
+			Ensure.That(nameof(encoded), ()=>encoded.Length >= 1);
 
 			var prefix = encoded[0];
 			var isInfinity = encoded.Length == InfinityBytesLen && prefix == InfinityPrefix;
@@ -94,7 +94,7 @@ namespace BitcoinLite.Crypto
 			if (isInfinity)
 				return Infinity;
 
-			var unsigned = encoded.SafeSubarray(1, 32);
+			var unsigned = encoded.Slice(1, 32);
 			var x = unsigned.ToBigIntegerUnsigned(true);
 			BigInteger y;
 
@@ -113,15 +113,15 @@ namespace BitcoinLite.Crypto
 			return new ECPoint(x, y);
 		}
 
-		public static ECPoint operator -(ECPoint p)
-		{
-			return new ECPoint(p._x, p._y + Secp256k1.P);
-		}
+		//public static ECPoint operator -(ECPoint p)
+		//{
+		//	return new ECPoint(p._x, p._y + Secp256k1.P);
+		//}
 
-		public static ECPoint operator -(ECPoint a, ECPoint b)
-		{
-			return a + (-b);
-		}
+		//public static ECPoint operator -(ECPoint a, ECPoint b)
+		//{
+		//	return a + (-b);
+		//}
 
 		public static ECPoint operator +(ECPoint p, ECPoint q)
 		{
@@ -199,13 +199,10 @@ namespace BitcoinLite.Crypto
 
 		public override int GetHashCode()
 		{
-			unchecked
-			{
-				var hashCode = _isInfinity.GetHashCode();
-				hashCode = (hashCode * 397) ^ _x.GetHashCode();
-				hashCode = (hashCode * 397) ^ _y.GetHashCode();
-				return hashCode;
-			}
+			var hashCode = _isInfinity.GetHashCode();
+			hashCode = (hashCode * 7919) ^ _x.GetHashCode();
+			hashCode = (hashCode * 7919) ^ _y.GetHashCode();
+			return hashCode;
 		}
 
 		public static bool operator ==(ECPoint left, ECPoint right)

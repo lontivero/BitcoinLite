@@ -8,9 +8,9 @@ namespace BitcoinLite.Encoding
 		private static readonly int[] HexValueArray;
 		private static readonly string[] HexTbl = Enumerable.Range(0, 256).Select(v => v.ToString("x2")).ToArray();
 
-		public override string Encode(byte[] data, int offset, int count)
+		public override string GetString(byte[] data, int offset, int count)
 		{
-			Guard.NotNull(nameof(data), data);
+			Ensure.NotNull(nameof(data), data);
 
 			var pos = 0;
 			var s = new char[2 * count];
@@ -23,9 +23,9 @@ namespace BitcoinLite.Encoding
 			return new string(s);
 		}
 
-		public override byte[] Decode(string encoded)
+		public override byte[] GetBytes(string encoded)
 		{
-			Guard.NotNull(nameof(encoded), encoded);
+			Ensure.NotNull(nameof(encoded), encoded);
 			if (encoded.Length % 2 == 1)
 				throw new FormatException("Invalid Hex String");
 

@@ -29,9 +29,9 @@ namespace BitcoinLite.Structures
 				 
 		public BlockHeader(uint version, uint256 prev_block_hash, uint256 merkle_root_hash, uint timestamp, Target bits, uint nonce)
 		{
-			if(prev_block_hash == null) throw new ArgumentNullException("prev_block_hash"); 
-			if(merkle_root_hash == null) throw new ArgumentNullException("merkle_root_hash"); 
-			if(bits == null) throw new ArgumentNullException("bits"); 
+			if(prev_block_hash == null) throw new ArgumentNullException(nameof(prev_block_hash)); 
+			if(merkle_root_hash == null) throw new ArgumentNullException(nameof(merkle_root_hash)); 
+			if(bits == null) throw new ArgumentNullException(nameof(bits)); 
 
 			Version = version; 
 			PrevBlockHash = prev_block_hash; 
@@ -50,7 +50,7 @@ namespace BitcoinLite.Structures
 
 //		public static BlockHeader Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 
@@ -65,8 +65,8 @@ namespace BitcoinLite.Structures
 				 
 		public Block(BlockHeader header, IReadOnlyList<Transaction> transactions)
 		{
-			if(header == null) throw new ArgumentNullException("header"); 
-			if(transactions == null) throw new ArgumentNullException("transactions"); 
+			if(header == null) throw new ArgumentNullException(nameof(header)); 
+			if(transactions == null) throw new ArgumentNullException(nameof(transactions)); 
 
 			Header = header; 
 			Transactions = transactions; 
@@ -81,7 +81,7 @@ namespace BitcoinLite.Structures
 
 //		public static Block Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 
@@ -102,8 +102,8 @@ namespace BitcoinLite.Structures
 				 
 		public Transaction(uint version, IReadOnlyList<TxIn> inputs, IReadOnlyList<TxOut> outputs, uint lock_time)
 		{
-			if(inputs == null) throw new ArgumentNullException("inputs"); 
-			if(outputs == null) throw new ArgumentNullException("outputs"); 
+			if(inputs == null) throw new ArgumentNullException(nameof(inputs)); 
+			if(outputs == null) throw new ArgumentNullException(nameof(outputs)); 
 
 			Version = version; 
 			Inputs = inputs; 
@@ -120,7 +120,7 @@ namespace BitcoinLite.Structures
 
 //		public static Transaction Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 
@@ -138,8 +138,8 @@ namespace BitcoinLite.Structures
 				 
 		public TxIn(OutPoint previous_output, Script sig_script, uint sequence)
 		{
-			if(previous_output == null) throw new ArgumentNullException("previous_output"); 
-			if(sig_script == null) throw new ArgumentNullException("sig_script"); 
+			if(previous_output == null) throw new ArgumentNullException(nameof(previous_output)); 
+			if(sig_script == null) throw new ArgumentNullException(nameof(sig_script)); 
 
 			PreviousOutput = previous_output; 
 			SigScript = sig_script; 
@@ -155,7 +155,7 @@ namespace BitcoinLite.Structures
 
 //		public static TxIn Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 
@@ -170,7 +170,7 @@ namespace BitcoinLite.Structures
 				 
 		public OutPoint(uint256 hash, uint index)
 		{
-			if(hash == null) throw new ArgumentNullException("hash"); 
+			if(hash == null) throw new ArgumentNullException(nameof(hash)); 
 
 			Hash = hash; 
 			Index = index; 
@@ -185,7 +185,7 @@ namespace BitcoinLite.Structures
 
 //		public static OutPoint Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 
@@ -200,7 +200,7 @@ namespace BitcoinLite.Structures
 				 
 		public TxOut(long value, Script script_pub_key)
 		{
-			if(script_pub_key == null) throw new ArgumentNullException("script_pub_key"); 
+			if(script_pub_key == null) throw new ArgumentNullException(nameof(script_pub_key)); 
 
 			Value = value; 
 			ScriptPubKey = script_pub_key; 
@@ -215,7 +215,7 @@ namespace BitcoinLite.Structures
 
 //		public static TxOut Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 

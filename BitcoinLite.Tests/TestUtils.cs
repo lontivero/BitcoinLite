@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Numerics;
-using System.Text;
+using BitcoinLite.Crypto;
 using BitcoinLite.Encoding;
 using NUnit.Framework;
 
@@ -15,14 +15,14 @@ namespace BitcoinLite.Tests
 			if (hex.Length%2 == 1)
 				hex = "0" + hex;
 
-			var bytes = Encoders.Hex.Decode(hex);
+			var bytes = Encoders.Hex.GetBytes(hex);
 			Array.Reverse(bytes);
 			return bytes;
 		}
 
 		internal static string ToHex(this byte[] arr)
 		{
-			return Encoders.Hex.Encode(arr);
+			return Encoders.Hex.GetString(arr);
 		}
 
 		internal static BigInteger HexToBigInteger(string hex)
@@ -89,6 +89,43 @@ namespace BitcoinLite.Tests
 						TestUtils.HexToBigInteger((string) line[5])
 						);
 					tc.SetName("ECPoint - " + (string) line[6]);
+					yield return tc;
+				}
+			}
+		}
+
+		public static IEnumerable ec_points_comparison
+		{
+			get
+			{
+				foreach (var line in JsonFile.GetData("ec_points_comparison.json"))
+				{
+					ECPoint p1 = null;
+					var l0 = (string)line[0];
+					var l1 = (string)line[1];
+					if (!string.IsNullOrWhiteSpace(l0) && !string.IsNullOrWhiteSpace(l1))
+					{
+						var x = TestUtils.HexToBigInteger(l0);
+						var y = TestUtils.HexToBigInteger(l1);
+						p1 = new ECPoint(x, y);
+					}
+
+					ECPoint p2 = null;
+					var l2 = (string)line[2];
+					var l3 = (string)line[3];
+					if (!string.IsNullOrWhiteSpace(l2) && !string.IsNullOrWhiteSpace(l3))
+					{
+						var x = TestUtils.HexToBigInteger(l2);
+						var y = TestUtils.HexToBigInteger(l3);
+						p2 = new ECPoint(x, y);
+					}
+
+					var tc = new TestCaseData(
+						p1,
+						p2,
+						(bool)line[4]
+						);
+					tc.SetName("ECPoint - " + (string)line[5]);
 					yield return tc;
 				}
 			}

@@ -6,6 +6,7 @@ using System.Linq;
 using BitcoinLite.Crypto;
 using BitcoinLite.Encoding;
 using BitcoinLite.Utils;
+using System.Text;
 
 namespace BitcoinLite
 {
@@ -630,19 +631,23 @@ namespace BitcoinLite
 		};
 		#endregion
 
-		public Opcode GetOpcode(byte code)
+		internal Opcode Opcode { get; }
+		internal byte[] Data { get; }
+
+		internal static Opcode GetOpcode(byte code)
 		{
 			return Code2Opcode[code];
 		}
 
-		public byte Code { get; set; }
-		public byte[] Data { get; set; }
-		public Opcode Opcode => (Opcode)Code;
-
-		public Op(byte code, byte[] data = null)
+		internal Op(Opcode opcode, byte[] data=null)
 		{
-			Code = code;
+			Opcode = opcode;
 			Data = data;
+		}
+
+		public static bool IsPush(Opcode opcode)
+		{
+			return Opcode.OP_0 <= opcode && opcode <= Opcode.OP_16 && opcode != Opcode.OP_RESERVED;
 		}
 
 		public override string ToString()
@@ -650,124 +655,67 @@ namespace BitcoinLite
 			var opcodeName = Enum.GetName(typeof(Opcode), Opcode);
 			if (Data == null)
 			{
-				return opcodeName ?? Code.ToString("x2");
+				return opcodeName ?? Opcode.ToString("x2");
 			}
 
-			var str = string.Empty;
-			if (Opcode == Opcode.OP_PUSHDATA1 || Opcode == Opcode.OP_PUSHDATA2 || Opcode == Opcode.OP_PUSHDATA4)
-			{
-				str = opcodeName;
-			}
-			if (Data.Length > 0)
-			{
-				str += " " + Encoders.Hex.Encode(Data);
-			}
-			return str;
-		}
-
-		internal static Op Push(byte[] data)
-		{
-			var len = (ulong)data.Length;
-			var op = Opcode.OP_INVALIDOPERATION;
-
-			if(len == 0) 
-				op = Opcode.OP_0;
-
-			var data0 = data[0];
-
-			if( len == 1 && (data0 >= 1 && data0 <= 16) )
-				op = Opcode.OP_1 + (byte)len - 1;
-
-			else if (len == 1 && data0 == 0x81)
-				op = Opcode.OP_1NEGATE;
-
-			else if (len >  (long)Opcode.OP_0 && len < (ulong)Opcode.OP_PUSHDATA1)
-				op = (Opcode)len;
-
-			else if (len <= byte.MaxValue)
-				op = Opcode.OP_PUSHDATA1;
-
-			else if (len <= ushort.MaxValue)
-				op = Opcode.OP_PUSHDATA2;
-
-			else if (len <= uint.MaxValue)
-				op = Opcode.OP_PUSHDATA4;
-
-			return new Op((byte)op, data);
-		}
-
-		public string ToHex()
-		{
-			var code = Code.ToString("x2");
-			if (Data == null)
-			{
-				return code;
-			}
-
-			byte[] buf = null;
-			var len = Data.Length;
-			if(len > (int)Opcode.OP_0 && len < (int)Opcode.OP_PUSHDATA1)
-			{
-				buf = Packer.Pack("bA", len, Data);
-			}
-			else if (len >= (int)Opcode.OP_PUSHDATA1)
-			{
-				buf = Packer.Pack("bbA", Opcode.OP_PUSHDATA1, len, Data);
-			}
-			else if (len > byte.MaxValue)
-			{
-				buf = Packer.Pack("bSA", Opcode.OP_PUSHDATA2, len, Data);
-			}
-			else if (len >= ushort.MaxValue)
-			{
-				buf = Packer.Pack("bIA", Opcode.OP_PUSHDATA4, len, Data);
-			}
-			return Encoders.Hex.Encode(buf);
+			return Encoders.Hex.GetString(Data);
 		}
 	}
 
-	public class Script
+	public class Script : IBinarySerializable
 	{
 		public static readonly Script Empty = new Script();
 
-		private readonly List<Op> _items = new List<Op>();
+		private readonly MemoryStream _stream = new MemoryStream();
 
 		public static Script FromAddress(Address address)
 		{
-			var addressHex = Encoders.Hex.Encode(address.ToByteArray());
-			return FromAsm($"OP_DUP OP_HASH160 {addressHex} OP_EQUALVERIFY OP_CHECKSIG");
+			return address.ScriptPubKey;
 		}
 
-		public static Script FromPubKey(PublicKey publicKey)
+		public static Script FromPubKey(PubKey publicKey)
 		{
-			var s = new Script();
-			s.Add(Op.Push(publicKey.ToByteArray()));
-			s.Add(Opcode.OP_CHECKSIG);
-			return s;
+			var pubKey = Encoders.Hex.GetString(publicKey.ToByteArray());
+			return FromAsm($"{pubKey} OP_CHECKSIG");
 		}
 
-		public static Script FromPubKeyHash(PublicKey publicKey)
+		public static Script FromDestination(KeyId keyId)
 		{
-			var s = new Script();
-			s.Add(Op.Push(publicKey.Hash));
-			s.Add(Opcode.OP_CHECKSIG);
-			return s;
+			return FromPubKeyHash(keyId);
+		}
+
+		public static Script FromDestination(ScriptId scriptId)
+		{
+			return FromScriptId(scriptId);
+		}
+
+		public static Script FromPubKeyHash(KeyId keyId)
+		{
+			var pubKeyHash = Encoders.Hex.GetString(keyId.ToByteArray());
+			return FromAsm($"{pubKeyHash} OP_CHECKSIG");
+		}
+
+		public static Script FromScriptId(ScriptId scriptId)
+		{
+			var id = Encoders.Hex.GetString(scriptId.ToByteArray());
+			return FromAsm($"OP_HASH160 {id} OP_EQUAL");
 		}
 
 		public static Script FromAsm(string str)
 		{
-			var script = new Script();
-			var tokens = str.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+			var stream = new MemoryStream();
+			var writer = new ScriptWriter(stream);
+			var tokens = str.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 			for (var i = 0; i < tokens.Length; i++)
 			{
 				var token = tokens[i];
 				Opcode opcode;
-				if(Enum.TryParse(token, out opcode))
+				if (Enum.TryParse(token, out opcode))
 				{
-					script.Add(opcode);
+					writer.WriteCode(opcode);
 					if (opcode == Opcode.OP_PUSHDATA1 || opcode == Opcode.OP_PUSHDATA2 || opcode == Opcode.OP_PUSHDATA4)
 					{
-						script.Add(opcode, Encoders.Hex.Decode(tokens[i + 2]));
+						writer.WriteData(Encoders.Hex.GetBytes(tokens[i + 2]));
 						i += 2;
 					}
 					continue;
@@ -776,66 +724,59 @@ namespace BitcoinLite
 				var opcodevi = (Opcode)token[0];
 				if (opcodevi > 0 && opcodevi < Opcode.OP_PUSHDATA1)
 				{
-					var val = Encoders.Hex.Decode(token);
-					script.Add(val);
+					var val = Encoders.Hex.GetBytes(token);
+					writer.WriteData(val);
 				}
 			}
-			return script;
+			
+			return new Script(stream.ToArray());
 		}
 
 		public Script()
-		{}
+		{ }
 
 		public Script(byte[] data)
 		{
-			using (var reader = new BinaryReader(new MemoryStream(data)))
+			_stream.Write(data, 0, data.Length);
+		}
+
+		public ScriptId Hash => new ScriptId(this);
+
+		private IEnumerable<Op> ToOpcodes()
+		{
+			_stream.Seek(0, SeekOrigin.Begin);
+			var reader = new ScriptReader(_stream);
+			var op = reader.ReadOp();
+			while (op!=null)
 			{
-				while (true)
-				{
-					Opcode opcode;
-					try
-					{
-						opcode = (Opcode) reader.ReadByte();
-					}
-					catch (EndOfStreamException e)
-					{
-						break;
-					}
-					if (opcode > Opcode.OP_0 && opcode < Opcode.OP_PUSHDATA1)
-					{
-						Add(reader.ReadBytes((int)opcode));
-					}
-					else switch (opcode)
-					{
-						case Opcode.OP_PUSHDATA1:
-						{
-							var len = reader.ReadByte();
-							Add(reader.ReadBytes(len));
-						}
-							break;
-						case Opcode.OP_PUSHDATA2:
-						{
-							var len = reader.ReadUInt16();
-							Add(reader.ReadBytes(len));
-						}
-							break;
-						case Opcode.OP_PUSHDATA4:
-						{
-							var len = reader.ReadUInt32();
-							Add(reader.ReadBytes((int)len));
-						}
-							break;
-						default:
-							Add(opcode);
-							break;
-					}
-				}
+				yield return op;
+				op = reader.ReadOp();
 			}
+		}
+	
+		public bool IsPayToPubKeyHash()
+		{
+			var ops = ToOpcodes().ToArray();
+			if (ops.Length != 5) return false;
+			if (ops[0].Opcode != Opcode.OP_DUP) return false;
+			if (ops[1].Opcode != Opcode.OP_HASH160) return false;
+			if (ops[2].Opcode != (Opcode)0x20) return false;
+			if (ops[2].Data == null || ops[2].Data.Length != 0x20) return false;
+			if (ops[3].Opcode != Opcode.OP_EQUALVERIFY) return false;
+			if (ops[4].Opcode != Opcode.OP_CHECKSIG) return false;
+			return true;
 		}
 
 		public string ToAsm()
 		{
-			return string.Join(" ", _items);
+			var sb = new StringBuilder();
+			foreach(var opcode in ToOpcodes())
+			{
+				sb.Append(opcode);
+				sb.Append(" ");
+			}
+			var s = sb.ToString();
+			return s.Substring(0, s.Length - 1);
 		}
 
 		public static Script FromHex(string str)
@@ -843,29 +784,106 @@ namespace BitcoinLite
 			return Empty;
 		}
 
-		public string ToHex()
+		public byte[] ToByteArray()
 		{
-			return string.Join("", _items.Select(x=>x.ToHex()));
+			return _stream.ToArray();
 		}
 
 		public override string ToString()
 		{
-			return ToAsm();
+			return Encoders.Hex.GetString(ToByteArray());
+		}
+	}
+
+	class ScriptReader
+	{
+		private BinaryReader _reader;
+
+		public ScriptReader(Stream stream)
+		{
+			_reader = new BinaryReader(stream);
 		}
 
-		private void Add(Op op)
+		public Op ReadOp()
 		{
-			_items.Add(op);
+			Opcode opcode;
+			if (_reader.BaseStream.Position == _reader.BaseStream.Length)
+				return null;
+
+			opcode = (Opcode)_reader.ReadByte();
+
+			if (opcode > Opcode.OP_0 && opcode < Opcode.OP_PUSHDATA1)
+			{
+				return new Op(opcode, _reader.ReadBytes((int)opcode));
+			}
+			else switch (opcode)
+			{
+				case Opcode.OP_PUSHDATA1:
+				{
+					var len = _reader.ReadByte();
+					return new Op(opcode, _reader.ReadBytes(len));
+				}
+				case Opcode.OP_PUSHDATA2:
+				{
+					var len = _reader.ReadUInt16();
+					return new Op(opcode, _reader.ReadBytes(len));
+				}
+				case Opcode.OP_PUSHDATA4:
+				{
+					var len = _reader.ReadUInt32();
+					return new Op(opcode, _reader.ReadBytes((int)len));
+				}
+				default:
+				{
+					return new Op(opcode);
+				}
+			}
+		}
+	}
+
+	class ScriptWriter
+	{
+		private BinaryWriter _writer;
+
+		public ScriptWriter(Stream stream)
+		{
+			_writer = new BinaryWriter(stream);
 		}
 
-		private void Add(Opcode op, byte[] data = null, byte lenght = 0)
+		public void WriteCode(Opcode op)
 		{
-			_items.Add(new Op((byte)op, data));
+			_writer.Write((byte)op);
 		}
 
-		private void Add(byte[] data)
+		public void WriteData(byte[] data)
 		{
-			_items.Add(new Op((byte)data.Length, data));
+			var len = data.Length;
+			var data0 = data[0];
+
+			if (len > (long)Opcode.OP_0 && len < (long)Opcode.OP_PUSHDATA1)
+			{
+				_writer.Write((byte)len);
+			}
+			else if (len <= byte.MaxValue)
+			{
+				_writer.Write((byte)Opcode.OP_PUSHDATA1);
+				_writer.Write((byte)len);
+			}
+			else if (len <= ushort.MaxValue)
+			{
+				_writer.Write((byte)Opcode.OP_PUSHDATA2);
+				_writer.Write(Packer.LittleEndian.GetBytes(len), 0, sizeof(ushort));
+			}
+			else if (len <= int.MaxValue)
+			{
+				_writer.Write((byte)Opcode.OP_PUSHDATA4);
+				_writer.Write(Packer.LittleEndian.GetBytes(len), 0, sizeof(uint));
+			}
+			else
+			{
+				throw new ArgumentOutOfRangeException(nameof(data));
+			}
+			_writer.Write(data, 0, len);
 		}
 	}
 }

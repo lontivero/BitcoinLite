@@ -54,8 +54,8 @@ namespace BitcoinLite.Crypto
 			if(rlength + slength + 4 != sig[1])
 				throw new FormatException("Signature is not DER formatted. " + "Lenght is incorrect");
 
-			var r = new BigInteger(sig.SafeSubarray(4, rlength).ToBigEndian());
-			var s = new BigInteger(sig.SafeSubarray(4 + rlength + 2, slength).ToBigEndian());
+			var r = new BigInteger(sig.Slice(4, rlength).ToBigEndian());
+			var s = new BigInteger(sig.Slice(4 + rlength + 2, slength).ToBigEndian());
 			return new ECDSASignature(r, s);
 		}
 

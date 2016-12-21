@@ -10,10 +10,10 @@ namespace BitcoinLite.Crypto
 			return SHA256(data, 0, data.Length);
 		}
 
-		public static byte[] SHA256(byte[] data, int count)
-		{
-			return SHA256(data, 0, count);
-		}
+		//public static byte[] SHA256(byte[] data, int count)
+		//{
+		//	return SHA256(data, 0, count);
+		//}
 
 		public static byte[] SHA256(byte[] data, int offset, int count)
 		{
@@ -30,10 +30,10 @@ namespace BitcoinLite.Crypto
 			return SHA256d(data, 0, data.Length);
 		}
 
-		public static byte[] SHA256d(byte[] data, int count)
-		{
-			return SHA256d(data, 0, count);
-		}
+		//public static byte[] SHA256d(byte[] data, int count)
+		//{
+		//	return SHA256d(data, 0, count);
+		//}
 
 		public static byte[] SHA256d(byte[] data, int offset, int count)
 		{
@@ -48,10 +48,10 @@ namespace BitcoinLite.Crypto
 			return RIPEMD160(data, 0, data.Length);
 		}
 
-		public static byte[] RIPEMD160(byte[] data, int count)
-		{
-			return RIPEMD160(data, 0, count);
-		}
+		//public static byte[] RIPEMD160(byte[] data, int count)
+		//{
+		//	return RIPEMD160(data, 0, count);
+		//}
 
 		public static byte[] RIPEMD160(byte[] data, int offset, int count)
 		{

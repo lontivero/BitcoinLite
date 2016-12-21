@@ -3,31 +3,30 @@ using BitcoinLite.Utils;
 
 namespace BitcoinLite.Crypto
 {
-	public class PublicKey
+	public class PubKey : IBinarySerializable
 	{
 		private readonly byte[] _key;
-		private byte[] _pubKeyHash;
 
-		public PublicKey(byte[] key)
+		public PubKey(byte[] key)
 		{
 			_key = key;
 		}
 
-		public PublicKey(ECPoint point, bool isCompressed)
+		public PubKey(ECPoint point, bool isCompressed)
 			: this(point.Encode(isCompressed))
 		{
 		}
 
-		public byte[] Hash => _pubKeyHash ?? (_pubKeyHash = Hashes.RIPEMD160(Hashes.SHA256(_key)));
+		public KeyId Hash => new KeyId(Hashes.RIPEMD160(Hashes.SHA256(_key)));
 
 		public Address ToAddress(Network network)
 		{
-			return new Address(network, Hash);
+			return Hash.GetAddress(network); // new PubKeyHashAddress(network, Hash);
 		}
 
 		public byte[] ToByteArray()
 		{
-			return _key.SafeSubarray(0);
+			return _key.CloneByteArray();
 		}
 
 		public ECPoint Point => ECPoint.Decode(_key);
@@ -39,16 +38,16 @@ namespace BitcoinLite.Crypto
 			return ECDsaSigner.VerifySignature(data, signature, this);
 		}
 
-		public bool IsCaononical => ECPoint.IsCanonical(_key);
+		public bool IsCanonical => ECPoint.IsCanonical(_key);
 
 		public override string ToString()
 		{
-			return Encoders.Hex.Encode(ToByteArray());
+			return Encoders.Hex.GetString(ToByteArray());
 		}
 
 		public string ToString(Network network)
 		{
-			return Base58Data.ToString(ToByteArray(), DataTypePrefix.PrivateKey, network);
+			return ToAddress(network).ToString();
 		}
 	}
 }

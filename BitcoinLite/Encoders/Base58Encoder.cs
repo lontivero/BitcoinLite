@@ -10,7 +10,7 @@ namespace BitcoinLite.Encoding
 	{
 		private static readonly Base58Encoder InternalEncoder = new Base58Encoder();
 
-		public override string Encode(byte[] data, int offset, int count)
+		public override string GetString(byte[] data, int offset, int count)
 		{
 			var toEncode = new byte[count + 4];
 			Buffer.BlockCopy(data, offset, toEncode, 0, count);
@@ -18,22 +18,22 @@ namespace BitcoinLite.Encoding
 			var hash = Hashes.SHA256d(data, offset, count);
 			Buffer.BlockCopy(hash, 0, toEncode, count, 4);
 
-			return InternalEncoder.Encode(toEncode, 0, toEncode.Length);
+			return InternalEncoder.GetString(toEncode, 0, toEncode.Length);
 		}
 
-		public override byte[] Decode(string encoded)
+		public override byte[] GetBytes(string encoded)
 		{
-			var vchRet = InternalEncoder.Decode(encoded);
+			var vchRet = InternalEncoder.GetBytes(encoded);
 			if (vchRet.Length < 4)
 				throw new FormatException("Invalid checked base 58 string");
 			
-			var calculatedHash = Hashes.SHA256d(vchRet, 0, vchRet.Length - 4).SafeSubarray(0, 4);
-			var expectedHash = vchRet.SafeSubarray(vchRet.Length - 4, 4);
+			var calculatedHash = Hashes.SHA256d(vchRet, 0, vchRet.Length - 4).Slice(0, 4);
+			var expectedHash = vchRet.Slice(vchRet.Length - 4, 4);
 
 			if (!calculatedHash.IsEqualTo(expectedHash))
 				throw new FormatException("Invalid hash of the base 58 string");
 			
-			vchRet = vchRet.SafeSubarray(0, vchRet.Length - 4);
+			vchRet = vchRet.Slice(0, vchRet.Length - 4);
 			return vchRet;
 		}
 	}
@@ -42,12 +42,12 @@ namespace BitcoinLite.Encoding
 	{
 		private static readonly char[] Base58Chars = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".ToCharArray();
 
-		public override string Encode(byte[] data, int offset, int count)
+		public override string GetString(byte[] data, int offset, int count)
 		{
 			BigInteger bn58 = 58;
 			BigInteger bn0 = 0;
 
-			var t = ByteArray.Zero.Concat(data.SafeSubarray(offset, count));
+			var t = ByteArray.Zero.Concat(data.Slice(offset, count));
 			var bn = t.ToBigIntegerUnsigned(true);
 
 			var str = "";
@@ -72,10 +72,9 @@ namespace BitcoinLite.Encoding
 			return str;
 		}
 
-		public override byte[] Decode(string encoded)
+		public override byte[] GetBytes(string encoded)
 		{
-			if (encoded == null)
-				throw new ArgumentNullException("encoded");
+			Ensure.NotNull(nameof(encoded), encoded);
 
 			var result = new byte[0];
 			if(encoded.Length == 0)
@@ -117,7 +116,7 @@ namespace BitcoinLite.Encoding
 
 			// Trim off sign byte if present
 			if(t.Length >= 2 && t[t.Length - 1] == 0 && t[t.Length - 2] >= 0x80)
-				t = t.SafeSubarray(0, t.Length - 1);
+				t = t.Slice(0, t.Length - 1);
 
 			// Restore leading zeros
 			var nLeadingZeros = 0;

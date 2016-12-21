@@ -15,18 +15,9 @@ namespace BitcoinLite.Structures
 	{
 		private uint256 _hash;
 
-		public uint256 Hash
-		{
-			get { return _hash ?? (_hash = new uint256(Hashes.SHA256d(this.ToByteArray()))); }
-		}
+		public uint256 Hash => _hash ?? (_hash = new uint256(Hashes.SHA256d(this.ToByteArray())));
 
-		public DateTimeOffset BlockTime
-		{
-			get
-			{
-				return Timestamp.ToDateTimeOffset();
-			}
-		}
+		public DateTimeOffset BlockTime => Timestamp.ToDateTimeOffset();
 
 		public bool CheckProofOfWork()
 		{
@@ -87,10 +78,7 @@ namespace BitcoinLite.Structures
 	{
 		private uint256 _hash;
 
-		public uint256 Hash
-		{
-			get { return _hash ?? (_hash = new uint256(Hashes.SHA256d(this.ToByteArray()))); }
-		}
+		public uint256 Hash => _hash ?? (_hash = new uint256(Hashes.SHA256d(this.ToByteArray())));
 
 		public long TotalOut
 		{
@@ -117,13 +105,7 @@ namespace BitcoinLite.Structures
 		}
 		*/
 
-		public bool IsCoinBase
-		{
-			get
-			{
-				return (Inputs.Count == 1 && Inputs[0].PreviousOutput.IsNull);
-			}
-		}
+		public bool IsCoinBase => (Inputs.Count == 1 && Inputs[0].PreviousOutput.IsNull);
 	}
 
 	public partial class TxIn
@@ -143,7 +125,7 @@ namespace BitcoinLite.Structures
 
 		public TxIn(OutPoint prevout)
 		{
-			if (prevout == null) throw new ArgumentNullException("prevout");
+			Ensure.NotNull(nameof(prevout), prevout);
 			SigScript = Script.Empty;
 			Sequence = uint.MaxValue;
 			PreviousOutput = prevout;
@@ -175,15 +157,9 @@ namespace BitcoinLite.Structures
 			Value = 0;
 		}
 
-		public bool IsNull { get { return Value == -1; } }
+		public bool IsNull => Value == -1;
 
-		public bool IsDust
-		{
-			get
-			{
-				return ((1000 * Value) / (3 * (this.ToByteArray().Length + 148)) < ProtocolConstants.MinRelayTxFee);
-			}
-		}
+		public bool IsDust => ((1000 * Value) / (3 * (this.ToByteArray().Length + 148)) < ProtocolConstants.MinRelayTxFee);
 
 		//public bool IsTo(IDestination destination)
 		//{
@@ -193,14 +169,14 @@ namespace BitcoinLite.Structures
 
 	public partial class OutPoint : IComparable<OutPoint>
 	{
-		public readonly static OutPoint None = new OutPoint(uint256.Zero, 0);
+		public static readonly OutPoint None = new OutPoint(uint256.Zero, 0);
 
 		public OutPoint(Transaction tx, uint i)
 			: this(tx.Hash, i)
 		{
 		}
 
-		public bool IsNull { get { return Hash == 0 && Index == 0; }}
+		public bool IsNull => Hash == 0 && Index == 0;
 
 		public static bool operator <(OutPoint a, OutPoint b)
 		{

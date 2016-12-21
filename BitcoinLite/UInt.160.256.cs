@@ -4,24 +4,24 @@ using BitcoinLite.Utils;
 
 namespace BitcoinLite
 {
-	public class uint256 : IComparable, IComparable<uint256>, IEquatable<uint256>
+	public class uint256 : IComparable, IComparable<uint256>, IEquatable<uint256>, IBinarySerializable
 	{
-		public readonly static uint256 Zero = new uint256(0);
-		public readonly static uint256 One = new uint256(1);
-		public readonly static uint256 Two = new uint256(2);
-		public readonly static uint256 MaxValue = ~Zero;
+		public static readonly uint256 Zero = new uint256(0);
+		public static readonly uint256 One = new uint256(1);
+		public static readonly uint256 Two = new uint256(2);
+		public static readonly uint256 MaxValue = ~Zero;
 
-		public readonly static int Size = 256 / 8;
+		public static readonly int Size = 256 / 8;
 
 		private static readonly HexEncoder Encoder = new HexEncoder();
 
 		private const int Integers = 256 / 32;
-		private readonly UInt32[] _data = new UInt32[Integers];
+		private readonly uint[] _data = new uint[Integers];
 
 		public uint256(uint256 b)
 		{
 			if(b == null)
-				throw new ArgumentNullException("b");
+				throw new ArgumentNullException(nameof(b));
 
 			Array.Copy(b._data, _data, Integers);
 		}
@@ -35,7 +35,7 @@ namespace BitcoinLite
 		public uint256(byte[] array, int offset)
 		{
 			if (array == null)
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			if (array.Length - offset != Size)
 				throw new FormatException("the byte array should be 256 bits long");
 
@@ -62,7 +62,7 @@ namespace BitcoinLite
 
 		public static uint256 Parse(string hex)
 		{
-			var bytes = Packer.BigEndian.GetBytes(Encoder.Decode(hex.Trim()));
+			var bytes = Packer.BigEndian.GetBytes(Encoder.GetBytes(hex.Trim()));
 			Array.Resize(ref bytes, Size);
 			return new uint256(bytes);
 		}
@@ -70,7 +70,7 @@ namespace BitcoinLite
 		public static bool TryParse(string hex, out uint256 result)
 		{
 			if(string.IsNullOrEmpty(hex))
-				throw new ArgumentException("hex");
+				throw new ArgumentException("invalid null or empty string", nameof(hex));
 
 			result = null;
 			if (hex.Length != Size * 2)
@@ -91,8 +91,7 @@ namespace BitcoinLite
 		{
 			get
 			{
-				if (index < 0 || index >= Size)
-					throw new IndexOutOfRangeException("index");
+				Ensure.InRange(nameof(index), index, 0, Size);
 
 				var uintIndex = index / sizeof(uint);
 				var byteIndex = index%sizeof (uint);
@@ -220,7 +219,7 @@ namespace BitcoinLite
 		public static uint256 operator &(uint256 a, uint256 b)
 		{
 			var n = new uint256(a);
-			for(int i = 0 ; i < Integers ; i++)
+			for(var i = 0 ; i < Integers ; i++)
 				n._data[i] &= b._data[i];
 			return n;
 		}
@@ -343,31 +342,31 @@ namespace BitcoinLite
 
 		public override string ToString()
 		{
-			return Encoder.Encode(Packer.BigEndian.GetBytes(ToByteArray()));
+			return Encoder.GetString(Packer.BigEndian.GetBytes(ToByteArray()));
 		}
 	}
 
 
 
 
-	public class uint160 : IComparable, IComparable<uint160>, IEquatable<uint160>
+	public class uint160 : IComparable, IComparable<uint160>, IEquatable<uint160>, IBinarySerializable
 	{
-		public readonly static uint160 Zero = new uint160(0);
-		public readonly static uint160 One = new uint160(1);
+		public static readonly uint160 Zero = new uint160(0);
+		public static readonly uint160 One = new uint160(1);
 		public static readonly uint160 Two = new uint160(2);
-		public readonly static uint160 MaxValue = ~Zero;
+		public static readonly uint160 MaxValue = ~Zero;
 
-		public readonly static int Size = 160 / 8;
+		public static readonly int Size = 160 / 8;
 
 		private static readonly HexEncoder Encoder = new HexEncoder();
 
 		private const int Integers = 160 / 32;
-		private readonly UInt32[] _data = new UInt32[Integers];
+		private readonly uint[] _data = new uint[Integers];
 
 		public uint160(uint160 b)
 		{
 			if (b == null)
-				throw new ArgumentNullException("b");
+				throw new ArgumentNullException(nameof(b));
 
 			Array.Copy(b._data, _data, Integers);
 		}
@@ -382,7 +381,7 @@ namespace BitcoinLite
 		public uint160(byte[] array, int offset)
 		{
 			if (array == null)
-				throw new ArgumentNullException("array");
+				throw new ArgumentNullException(nameof(array));
 			if (array.Length - offset != Size)
 				throw new FormatException("the byte array should be 160 byte long");
 
@@ -395,7 +394,6 @@ namespace BitcoinLite
 		public uint160(byte[] array)
 			: this(array, 0)
 		{
-			
 		}
 
 		private uint160()
@@ -409,7 +407,7 @@ namespace BitcoinLite
 
 		public static uint160 Parse(string hex)
 		{
-			var bytes = Packer.BigEndian.GetBytes(Encoder.Decode(hex.Trim()));
+			var bytes = Packer.BigEndian.GetBytes(Encoder.GetBytes(hex.Trim()));
 			Array.Resize(ref bytes, Size);
 			return new uint160(bytes);
 		}
@@ -417,7 +415,7 @@ namespace BitcoinLite
 		public static bool TryParse(string hex, out uint160 result)
 		{
 			if (string.IsNullOrEmpty(hex))
-				throw new ArgumentException("hex");
+				throw new ArgumentException("invalid null or empty string", nameof(hex));
 
 			result = null;
 			if (hex.Length != Size * 2)
@@ -492,7 +490,7 @@ namespace BitcoinLite
 
 		private static int Comparison(uint160 a, uint160 b)
 		{
-			 for (int i = Integers-1; i >= 0; i--)
+			for (var i = Integers-1; i >= 0; i--)
 			{
 				if (a._data[i] < b._data[i])
 					return -1;
@@ -544,9 +542,9 @@ namespace BitcoinLite
 		{
 			var result = new uint160();
 			ulong carry = 0;
-			for (int i = 0; i < Integers; i++)
+			for (var i = 0; i < Integers; i++)
 			{
-				ulong n = carry + a._data[i] + b._data[i];
+				var n = carry + a._data[i] + b._data[i];
 				result._data[i] = (uint)(n & 0xffffffff);
 				carry = n >> 32;
 			}
@@ -566,7 +564,7 @@ namespace BitcoinLite
 		public static uint160 operator &(uint160 a, uint160 b)
 		{
 			var n = new uint160(a);
-			for(int i = 0 ; i < Integers ; i++)
+			for(var i = 0 ; i < Integers ; i++)
 				n._data[i] &= b._data[i];
 			return n;
 		}
@@ -608,7 +606,6 @@ namespace BitcoinLite
 			}
 			return result;
 		}
-
 		
 		public static uint160 operator ~(uint160 a)
 		{
@@ -651,7 +648,6 @@ namespace BitcoinLite
 			return arr;
 		}
 
-
 		public ulong GetLow64()
 		{
 			return _data[0] | (ulong)_data[1] << 32;
@@ -690,8 +686,7 @@ namespace BitcoinLite
 
 		public override string ToString()
 		{
-			return Encoder.Encode(Packer.BigEndian.GetBytes(ToByteArray()));
+			return Encoder.GetString(Packer.BigEndian.GetBytes(ToByteArray()));
 		}
-
 	}
 }

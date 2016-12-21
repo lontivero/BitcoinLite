@@ -7,7 +7,7 @@ namespace BitcoinLite.Structures
 {
 	public class Target
 	{
-		public static readonly BigInteger MaxValue = Encoders.Hex.Decode("00000000FFFF0000000000000000000000000000000000000000000000000000").ToBigIntegerUnsigned(true);
+		public static readonly BigInteger MaxValue = Encoders.Hex.GetBytes("00000000FFFF0000000000000000000000000000000000000000000000000000").ToBigIntegerUnsigned(true);
 		private static readonly BigInteger ScalingValue = 1000000000000;
 		private readonly int _bits;
 

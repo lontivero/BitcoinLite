@@ -22,14 +22,15 @@
 		{
 		}
 
-		public string Encode(byte[] data)
+		public string GetString(byte[] data)
 		{
-			return Encode(data, 0, data.Length);
+			Ensure.NotNull(nameof(data), data);
+			return GetString(data, 0, data.Length);
 		}
 
-		public abstract string Encode(byte[] data, int offset, int count);
+		public abstract string GetString(byte[] data, int offset, int count);
 
-		public abstract byte[] Decode(string encoded);
+		public abstract byte[] GetBytes(string encoded);
 	}
 
 	public static class Encoders

@@ -62,12 +62,12 @@ namespace BitcoinLite.Crypto
 			return VerifySignature(message, r, s, _privateKey.PublicPoint);
 		}
 
-		public static bool VerifySignature(byte[] message, ECDSASignature signature, PublicKey publicKey)
+		public static bool VerifySignature(byte[] message, ECDSASignature signature, PubKey publicKey)
 		{
 			return VerifySignature(message, signature.R, signature.S, publicKey.Point);
 		}
 
-		public static bool VerifySignature(byte[] message, BigInteger r, BigInteger s, PublicKey publicKey)
+		public static bool VerifySignature(byte[] message, BigInteger r, BigInteger s, PubKey publicKey)
 		{
 			return VerifySignature(message, r, s, publicKey.Point);
 		}

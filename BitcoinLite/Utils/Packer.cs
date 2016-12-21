@@ -139,51 +139,29 @@ namespace BitcoinLite.Utils
 		protected abstract void CopyBytes(byte[] from, int fromOffset, byte[] to, int toOffset, int count);
 
 
-		static public Packer LittleEndian
-		{
-			get
-			{
-				return BitConverter.IsLittleEndian ? CopyConv : SwapConv;
-			}
-		}
+		public static Packer LittleEndian => BitConverter.IsLittleEndian ? CopyConv : SwapConv;
 
-		static public Packer BigEndian
-		{
-			get
-			{
-				return BitConverter.IsLittleEndian ? SwapConv : CopyConv;
-			}
-		}
+		public static Packer BigEndian => BitConverter.IsLittleEndian ? SwapConv : CopyConv;
 
-		static public Packer Native
-		{
-			get
-			{
-				return CopyConv;
-			}
-		}
+		public static Packer Native => CopyConv;
 
-		static int Align(int current, int align)
+		private static int Align(int current, int align)
 		{
 			return ((current + align - 1) / align) * align;
 		}
 
-		class PackContext
+		private class PackContext
 		{
-			// Buffer
 			private byte[] _buffer;
-			int _next;
+			private int _next;
 
-			public string description;
-			public int i; // position in the description
-			public Packer conv;
-			public int repeat;
+			internal string description;
+			internal int i; // position in the description
+			internal Packer conv;
+			internal int repeat;
 
 			public void Add(byte[] group)
 			{
-				//Console.WriteLine ("Adding {0} bytes to {1} (next={2}", group.Length,
-				// buffer == null ? "null" : buffer.Length.ToString (), next);
-
 				if (_buffer == null)
 				{
 					_buffer = group;
@@ -193,7 +171,7 @@ namespace BitcoinLite.Utils
 
 				if (_next + group.Length > _buffer.Length)
 				{
-					var nb = new byte[Math.Max(_next, 16) * 2 + group.Length];
+					var nb = new byte[System.Math.Max(_next, 16) * 2 + group.Length];
 					Array.Copy(_buffer, nb, _buffer.Length);
 					Array.Copy(group, 0, nb, _next, group.Length);
 					_next = _next + group.Length;
@@ -241,6 +219,8 @@ namespace BitcoinLite.Utils
 		//   b    byte
 		//   c    1-byte signed character
 		//   C    1-byte unsigned character
+		//   X    IBinarySerializable
+		//   A    byte array
 		//   z8   string encoded as UTF8 with 1-byte null terminator
 		//   z6   string encoded as UTF16 with 2-byte null terminator
 		//   z7   string encoded as UTF7 with 1-byte null terminator
@@ -309,7 +289,7 @@ namespace BitcoinLite.Utils
 		//
 		// Returns: true if we must pick the next object from the list
 		//
-		static bool PackOne(PackContext b, object oarg)
+		private static bool PackOne(PackContext b, object oarg)
 		{
 			int n;
 
@@ -458,13 +438,12 @@ namespace BitcoinLite.Utils
 						b.Add(new byte[n]);
 					break;
 				default:
-					throw new ArgumentException(String.Format("invalid format specified `{0}'",
-											b.description[b.i]));
+					throw new ArgumentException($"invalid format specified '{b.description[b.i]}'", "description");
 			}
 			return true;
 		}
 
-		static bool Prepare(byte[] buffer, ref int idx, int size, ref bool align)
+		private static bool Prepare(byte[] buffer, ref int idx, int size, ref bool align)
 		{
 			if (align)
 			{
@@ -479,7 +458,7 @@ namespace BitcoinLite.Utils
 			return true;
 		}
 
-		static public IList Unpack(string description, byte[] buffer, int startIndex)
+		public static IList Unpack(string description, byte[] buffer, int startIndex)
 		{
 			Packer conv = CopyConv;
 			var result = new List<object>();
@@ -593,14 +572,14 @@ namespace BitcoinLite.Utils
 					case 'U':
 						if (Prepare(buffer, ref idx, 32, ref align))
 						{
-							result.Add(new uint256(buffer.SafeSubarray(idx)));
+							result.Add(new uint256(buffer.Slice(idx)));
 							idx += 32;
 						}
 						break;
 					case 'u':
 						if (Prepare(buffer, ref idx, 20, ref align))
 						{
-							result.Add(new uint160(buffer.SafeSubarray(idx)));
+							result.Add(new uint160(buffer.Slice(idx)));
 							idx += 20;
 						}
 						break;
@@ -616,12 +595,12 @@ namespace BitcoinLite.Utils
 					case '7':
 					case '8':
 					case '9':
-						repeat = ((short)description[i]) - ((short)'0');
+						repeat = (short)description[i] - (short)'0';
 						save = i + 1;
 						break;
 
 					case '*':
-						repeat = Int32.MaxValue;
+						repeat = int.MaxValue;
 						break;
 
 					case '[':
@@ -632,13 +611,11 @@ namespace BitcoinLite.Utils
 							if (description[j] == ']')
 								break;
 							n = ((short)description[j]) - ((short)'0');
-							if (n >= 0 && n <= 9)
-							{
-								if (count == -1)
-									count = n;
-								else
-									count = count * 10 + n;
-							}
+							if (n < 0 || n > 9) continue;
+							if (count == -1)
+								count = n;
+							else
+								count = count * 10 + n;
 						}
 						if (count == -1)
 							throw new ArgumentException("invalid size specification");
@@ -652,7 +629,7 @@ namespace BitcoinLite.Utils
 						// bool with_null = description [i] == 'z';
 						i++;
 						if (i >= description.Length)
-							throw new ArgumentException("$ description needs a type specified", "description");
+							throw new ArgumentException("$ description needs a type specified", nameof(description));
 						char d = description[i];
 						System.Text.Encoding e;
 						if (align)
@@ -691,7 +668,7 @@ namespace BitcoinLite.Utils
 								break;
 
 							default:
-								throw new ArgumentException("Invalid format for $ specifier", "description");
+								throw new ArgumentException("Invalid format for $ specifier", nameof(description));
 						}
 						int k = idx;
 						switch (n)
@@ -745,8 +722,7 @@ namespace BitcoinLite.Utils
 						}
 						break;
 					default:
-						throw new ArgumentException(String.Format("invalid format specified `{0}'",
-												description[i]));
+						throw new ArgumentException($"invalid format specified '{description[i]}'", nameof(description));
 				}
 
 				if (repeat > 0)
@@ -760,7 +736,7 @@ namespace BitcoinLite.Utils
 			return result;
 		}
 
-		class CopyConverter : Packer
+		private class CopyConverter : Packer
 		{
 			protected override long FromBytes(byte[] value, int offset, int count)
 			{
@@ -787,7 +763,7 @@ namespace BitcoinLite.Utils
 			}
 		}
 
-		class SwapConverter : Packer
+		private class SwapConverter : Packer
 		{
 			protected override long FromBytes(byte[] buffer, int offset, int count)
 			{

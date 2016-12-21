@@ -76,7 +76,7 @@ namespace BitcoinLite.Structures
 		{
 <#foreach(var p in Details(t.Fields)){
 			if(MustValidate(p[2])){#>
-			if(<#=p[1]#> == null) throw new ArgumentNullException("<#=p[1]#>"); 
+			if(<#=p[1]#> == null) throw new ArgumentNullException(nameof(<#=p[1]#>)); 
 <#}}#>
 
 <#foreach(var p in Details(t.Fields)){#>
@@ -93,7 +93,7 @@ namespace BitcoinLite.Structures
 
 //		public static <#= t.Name #> Parse(string hex)
 //		{
-//			return FromByteArray(Encoders.Hex.Decode(hex));
+//			return FromByteArray(Encoders.Hex.GetBytes(hex));
 //		}
 	}
 
@@ -138,7 +138,7 @@ public static IEnumerable<string[]> Details(string[] fields)
 public static string CapitalizeWords(string value)
 {
    if( value == null )
-      throw new ArgumentNullException("value");
+      throw new ArgumentNullException(nameof(value));
    if( value.Length == 0 )
       return value;
 

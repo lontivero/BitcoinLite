@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinLite", "BitcoinLite\BitcoinLite.csproj", "{2D646097-7EE2-4F9B-AB15-B525ABAFDB9D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinLite.Tests", "BitcoinLite.Tests\BitcoinLite.Tests.csproj", "{A64A259D-AD5A-4F1C-8814-96D7C07C54A5}"

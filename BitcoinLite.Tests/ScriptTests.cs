@@ -22,7 +22,7 @@ namespace BitcoinLite.Tests
 
 			var hash = Hashes.SHA256(new byte[] { 0x01 });
 			var privateKey = new Key(hash);
-			var publicKey = privateKey.PublicKey;
+			var publicKey = privateKey.PubKey;
 			var script = publicKey.ScriptPubKey;
 			var expected = "02d415b187c6e7ce9da46ac888d20df20737d6f16a41639e68ea055311e1535dd9 OP_CHECKSIG";
 			Assert.AreEqual(expected, script.ToString());
@@ -35,17 +35,19 @@ namespace BitcoinLite.Tests
 			const string script1 = "OP_DUP OP_HASH160 657912a72d3ac8169fe8eaecd5ab401c94fc9981717e3e6dd4971889f785790c OP_EQUALVERIFY OP_CHECKSIG";
 
 			var s1 = Script.FromAsm(script1);
-			var s2 = new Script(Encoders.Hex.Decode(s1.ToHex()));
+			var s2 = new Script(Encoders.Hex.GetBytes(s1.ToString()));
 			Assert.AreEqual(s1.ToAsm(), s2.ToAsm());
-			Assert.AreEqual(s1.ToHex(), s2.ToHex());
+			Assert.AreEqual(s1.ToString(), s2.ToString());
+			Assert.True(s1.IsPayToPubKeyHash());
 
 			const string script2 = "OP_IF 4effffffff " +
 								   "46726f6d2061336136316665663433333039623966623233323235646637393130623033616663353436356239204d6f6e205365702031372030303a30303a303020323030310a46726f6d3a205361746f736869204e616b616d6f746f203c7361746f7368696e40676d782e636f6d3e0a446174653a204d6f6e2c2031322041756720323031332030323a32383a3032202d303230300a5375626a6563743a205b50415443485d2052656d6f7665202853494e474c457c444f55424c4529425954450a0a492072656d6f76656420746869732066726f6d20426974636f696e20696e20663165316662346264656638373863386663313536346661343138643434653735343161376538330a696e2053657074203720323031302c20616c6d6f73742074687265652079656172732061676f2e204265207761726e6564207468617420492068617665206e6f740a61637475616c6c792074657374656420746869732070617463682e0a2d2d2d0a206261636b656e64732f626974636f696e642f646573657269616c697a652e7079207c2020202038202b2d2d2d2d2d2d2d0a20312066696c65206368616e6765642c203120696e73657274696f6e282b292c20372064656c6574696f6e73282d290a0a64696666202d2d67697420612f6261636b656e64732f626974636f696e642f646573657269616c697a652e707920622f6261636b656e64732f626974636f696e642f646573657269616c697a652e70790a696e64657820363632303538332e2e38396239623162203130303634340a2d2d2d20612f6261636b656e64732f626974636f696e642f646573657269616c697a652e70790a2b2b2b20622f6261636b656e64732f626974636f696e642f646573657269616c697a652e70790a4040202d3238302c3130202b3238302c38204040206f70636f646573203d20456e756d65726174696f6e28224f70636f646573222c205b0a2020202020224f505f57495448494e222c20224f505f524950454d44313630222c20224f505f53484131222c20224f505f534841323536222c20224f505f48415348313630222c0a2020202020224f505f48415348323536222c20224f505f434f4445534550415241544f52222c20224f505f434845434b534947222c20224f505f434845434b534947564552494659222c20224f505f434845434b4d554c5449534947222c0a2020202020224f505f434845434b4d554c5449534947564552494659222c0a2d2020202028224f505f53494e474c45425954455f454e44222c2030784630292c0a2d2020202028224f505f444f55424c45425954455f424547494e222c20307846303030292c0a2020202020224f505f5055424b4559222c20224f505f5055424b455948415348222c0a2d2020202028224f505f494e56414c49444f50434f4445222c20307846464646292c0a2b2020202028224f505f494e56414c49444f50434f4445222c2030784646292c0a205d290a200a200a4040202d3239332c3130202b3239312c3620404020646566207363726970745f4765744f70286279746573293a0a202020202020202020766368203d204e6f6e650a2020202020202020206f70636f6465203d206f72642862797465735b695d290a20202020202020202069202b3d20310a2d20202020202020206966206f70636f6465203e3d206f70636f6465732e4f505f53494e474c45425954455f454e4420616e642069203c206c656e286279746573293a0a2d2020202020202020202020206f70636f6465203c3c3d20380a2d2020202020202020202020206f70636f6465207c3d206f72642862797465735b695d290a2d20202020202020202020202069202b3d20310a200a2020202020202020206966206f70636f6465203c3d206f70636f6465732e4f505f5055534844415441343a0a202020202020202020202020206e53697a65203d206f70636f64650a2d2d200a312e372e392e340a0a " +
 								   "OP_ENDIF";
 			s1 = Script.FromAsm(script2);
-			s2 = new Script(Encoders.Hex.Decode(s1.ToHex()));
+			s2 = new Script(Encoders.Hex.GetBytes(s1.ToString()));
 			Assert.AreEqual(s1.ToAsm(), s2.ToAsm());
-			Assert.AreEqual(s1.ToHex(), s2.ToHex());
+			Assert.AreEqual(s1.ToString(), s2.ToString());
+			Assert.False(s1.IsPayToPubKeyHash());
 		}
 
 		//[Test, TestCaseSource("ValidScripts")]
@@ -63,9 +65,78 @@ namespace BitcoinLite.Tests
 		//	}
 		//}
 
-		private static void ParseScript(string s)
+		[Test]
+		public void CanParseNOPs()
 		{
-			
+			var asm = "OP_NOP1 OP_NOP2 OP_NOP3 OP_NOP4 OP_NOP5 OP_NOP6 OP_NOP7 OP_NOP8 OP_NOP9";
+			var s = Script.FromAsm(asm);
+			Assert.AreEqual(asm, s.ToAsm());
 		}
+
+		//public void CanParseAndGeneratePayToPubkey()
+		//{
+		//	string scriptPubKey = "0364bd4b02a752798342ed91c681a48793bb1c0853cbcd0b978c55e53485b8e27c OP_CHECKSIG";
+		//	var pub = PayToPubkeyTemplate.Instance.ExtractScriptPubKeyParameters(Script.FromAsm(scriptPubKey));
+		//	Assert.AreEqual("0364bd4b02a752798342ed91c681a48793bb1c0853cbcd0b978c55e53485b8e27c", pub.ToHex());
+
+		//	scriptPubKey = "0464bd4b02a752798342ed91c681a48793bb1c0853cbcd0b978c55e53485b8e27cff45c67d5f7be479215e9a27cea37afe1a00fa968ae3cbad128c9cee403844b7 OP_CHECKSIG";
+		//	pub = PayToPubkeyTemplate.Instance.ExtractScriptPubKeyParameters(Script.FromAsm(scriptPubKey));
+		//	Assert.AreEqual("0464bd4b02a752798342ed91c681a48793bb1c0853cbcd0b978c55e53485b8e27cff45c67d5f7be479215e9a27cea37afe1a00fa968ae3cbad128c9cee403844b7", pub.ToHex());
+
+		//	scriptPubKey = "9964bd4b02a752798342ed91c681a48793bb1c0853cbcd0b978c55e53485b8e27c OP_CHECKSIG";
+		//	pub = PayToPubkeyTemplate.Instance.ExtractScriptPubKeyParameters(Script.FromAsm(scriptPubKey));
+		//	Assert.Null(pub);
+
+		//	string scriptSig = "3044022064f45a382a15d3eb5e7fe72076eec4ef0f56fde1adfd710866e729b9e5f3383d02202720a895914c69ab49359087364f06d337a2138305fbc19e20d18da78415ea9301";
+		//	var sig = PayToPubkeyTemplate.Instance.ExtractScriptSigParameters(Script.FromAsm(scriptSig));
+		//	Assert.NotNull(sig);
+		//	Assert.True(PayToPubkeyTemplate.Instance.CheckScriptSig(Script.FromAsm(scriptSig), null));
+
+		//	scriptSig = "0044022064f45a382a15d3eb5e7fe72076eec4ef0f56fde1adfd710866e729b9e5f3383d02202720a895914c69ab49359087364f06d337a2138305fbc19e20d18da78415ea9301";
+		//	sig = PayToPubkeyTemplate.Instance.ExtractScriptSigParameters(Script.FromAsm(scriptSig));
+		//	Assert.Null(sig);
+		//	Assert.False(PayToPubkeyTemplate.Instance.CheckScriptSig(Script.FromAsm(scriptSig), null));
+
+		//	scriptSig = Encoders.Hex.EncodeData(TransactionSignature.Empty.ToBytes());
+		//	sig = PayToPubkeyTemplate.Instance.ExtractScriptSigParameters(Script.FromAsm(scriptSig));
+		//	Assert.NotNull(sig);
+		//	Assert.True(PayToPubkeyTemplate.Instance.CheckScriptSig(Script.FromAsm(scriptSig), null));
+		//}
+
+		//[TestCase(    0UL,     "00")]
+		//[TestCase(    1UL,     "01")]
+		//[TestCase(  127UL,     "7F")]
+		//[TestCase(  128UL,   "8000")]
+		//[TestCase(  255UL,   "807F")]
+		//[TestCase(  256UL,   "8100")]
+		//[TestCase(16383UL,   "FE7F")]
+		//[TestCase(16384UL,   "FF00")]
+		//[TestCase(16511UL, "80FF7F")]
+		//[TestCase(65535UL, "82FD7F")]
+		//public void CanUseCompactVarInt(ulong value, string expectedStr)
+		//{
+		//	var expected = Encoders.Hex.GetBytes(expectedStr);
+		//	AssertEx.CollectionEquals(new CompactVarInt(val, sizeof(ulong)).ToBytes(), expectedBytes);
+		//	AssertEx.CollectionEquals(new CompactVarInt(val, sizeof(uint)).ToBytes(), expectedBytes);
+
+		//	var compact = new CompactVarInt(sizeof(ulong));
+		//	compact.ReadWrite(expectedBytes);
+		//	Assert.Equal(val, compact.ToLong());
+
+		//	compact = new CompactVarInt(sizeof(uint));
+		//	compact.ReadWrite(expectedBytes);
+		//	Assert.Equal(val, compact.ToLong());
+		//}
+
+		////	foreach (var i in Enumerable.Range(0, 65535 * 4))
+		////	{
+		////		var compact = new CompactVarInt((ulong)i, sizeof(ulong));
+		////		var bytes = compact.ToBytes();
+		////		compact = new CompactVarInt(sizeof(ulong));
+		////		compact.ReadWrite(bytes);
+		////		Assert.Equal((ulong)i, compact.ToLong());
+		////	}
+		////}
+
 	}
 }

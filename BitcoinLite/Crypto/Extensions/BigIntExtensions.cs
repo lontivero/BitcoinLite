@@ -46,9 +46,9 @@ namespace BitcoinLite.Crypto
 			var m = BigInteger.One;
 			var e = 0;
 
-			while (BigInteger.ModPow(b, m, p) != 1)
+			while (!BigInteger.ModPow(b, m, p).IsOne)
 			{
-				m <<= 1;
+				m *= 2;
 				e++;
 			}
 
@@ -88,7 +88,7 @@ namespace BitcoinLite.Crypto
 		{
 			var p1 = (p - 1);
 			if (BigInteger.ModPow(a, p1 / 2, p) == p1)
-				return -1;
+				return BigInteger.MinusOne;
 
 			if (p % 4 == 3)
 				return BigInteger.ModPow(a, (p + 1) / 4, p);
@@ -97,7 +97,7 @@ namespace BitcoinLite.Crypto
 			var e = FindE(p);
 			var n = new BigInteger(2);
 
-			while (BigInteger.ModPow(n, p1 / 2, p).IsOne)
+			while (BigInteger.ModPow(n, p1 / 2, p) == 1)
 				n++;
 
 			var x = BigInteger.ModPow(a, (s + 1) / 2, p);
@@ -133,7 +133,7 @@ namespace BitcoinLite.Crypto
 
 			while (s.IsEven)
 			{
-				s >>= 2;
+				s /= 2;
 				e++;
 			}
 
@@ -142,7 +142,15 @@ namespace BitcoinLite.Crypto
 
 		private static BigInteger TwoExp(int e)
 		{
-			return BigInteger.One << e;
+			BigInteger a = 1;
+
+			while (e > 0)
+			{
+				a *= 2;
+				e--;
+			}
+
+			return a;
 		}
 	}
 }

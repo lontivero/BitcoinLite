@@ -8,16 +8,16 @@ namespace BitcoinLite.Crypto
 {
 	public interface IPRNGenerator
 	{
-		byte[] Next();
+		byte[] GetBytes(int count);
 	}
 
 	public class WinCryptoPrng : IPRNGenerator
 	{
-		public byte[] Next()
+		public byte[] GetBytes(int count)
 		{
 			using(var rnd = new RNGCryptoServiceProvider())
 			{
-				var buffer = new byte[32];
+				var buffer = new byte[count];
 				rnd.GetBytes(buffer);
 				return buffer;
 			}

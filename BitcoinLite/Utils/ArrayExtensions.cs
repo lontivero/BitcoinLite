@@ -5,19 +5,24 @@ namespace BitcoinLite.Utils
 {
 	internal static class ArrayExtensions
 	{
-		internal static T[] SafeSubarray<T>(this T[] me, int offset, int count)
+		internal static T[] Slice<T>(this T[] me, int offset, int count)
 		{
 			var data = new T[count];
 			Buffer.BlockCopy(me, offset, data, 0, count);
 			return data;
 		}
 
-		internal static T[] SafeSubarray<T>(this T[] me, int offset)
+		internal static T[] Slice<T>(this T[] me, int offset)
 		{
 			var count = me.Length - offset;
 			var data = new T[count];
 			Buffer.BlockCopy(me, offset, data, 0, count);
 			return data;
+		}
+
+		internal static byte[] CloneByteArray(this byte[] src)
+		{
+			return src.Slice(0);
 		}
 
 		internal static T[] Concat<T>(this T[] me, params T[][] arrays)
@@ -40,6 +45,13 @@ namespace BitcoinLite.Utils
 			if(ReferenceEquals(me, other)) return true;
 			if(me == null ^ other == null) return false;
 			return me.SequenceEqual(other);
+		}
+
+		internal static byte[] PadLeft(this byte[] array, int padding)
+		{
+			return array.Length >= padding 
+				? array.CloneByteArray() 
+				: new byte[padding - array.Length].Concat(array);
 		}
 	}
 }

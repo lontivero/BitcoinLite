@@ -141,7 +141,7 @@ namespace BitcoinLite.Tests.Utils
 
 		private static byte[] Hex2Bytes(string str)
 		{
-			return Encoders.Hex.Decode(str).Reverse().ToArray();
+			return Encoders.Hex.GetBytes(str).Reverse().ToArray();
 		}
 	}
 }
