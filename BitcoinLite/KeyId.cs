@@ -4,20 +4,16 @@ using BitcoinLite.Utils;
 
 namespace BitcoinLite
 {
-	public class KeyId : ITxDestination, IBinarySerializable
+	public class KeyId : TxDestination
 	{
-		private readonly byte[] _hash;
-
 		public static KeyId Parse(string hex)
 		{
 			return new KeyId(Encoders.Hex.GetBytes(hex));
 		}
 
 		public KeyId(byte[] hash)
+			: base(hash)
 		{
-			Ensure.NotNull(nameof(hash), hash);
-			Ensure.That(nameof(hash), () => hash.Length == uint160.Size);
-			_hash = hash;
 		}
 
 		public KeyId(PubKey pubKey)
@@ -25,36 +21,21 @@ namespace BitcoinLite
 		{
 		}
 
-		public Script ScriptPubKey => Script.FromPubKeyHash(this);
+		public override Script ScriptPubKey => Script.FromPubKeyHash(this);
 
 		public Address GetAddress(Network network)
 		{
-			return new Address(network, DataTypePrefix.PublicKeyHash,  ToByteArray());
+			return new PubKeyHashAddress(network, Bytes);
 		}
 
-		public byte[] ToByteArray()
+		protected bool Equals(KeyId other)
 		{
-			return _hash.CloneByteArray();
+			return other != null && Bytes.IsEqualTo(other.Bytes);
 		}
 
 		public override bool Equals(object obj)
 		{
 			return ReferenceEquals(this, obj) || Equals(obj as KeyId);
-		}
-
-		protected bool Equals(KeyId other)
-		{
-			return other != null && _hash.IsEqualTo(other._hash);
-		}
-
-		public override int GetHashCode()
-		{
-			return _hash.GetHashCode();
-		}
-
-		public override string ToString()
-		{
-			return Encoders.Hex.GetString(_hash);
 		}
 	}
 }

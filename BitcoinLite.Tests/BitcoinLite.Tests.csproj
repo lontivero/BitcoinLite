@@ -30,6 +30,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -47,14 +50,13 @@
     <Compile Include="Bip32Tests.cs" />
     <Compile Include="Crypto\AddressTests.cs" />
     <Compile Include="Crypto\BigIntegerOpsTests.cs" />
-    <Compile Include="EncryptedKeyTests.cs" />
+    <Compile Include="Bip38Tests.cs" />
     <Compile Include="Crypto\KeyTests.cs" />
     <Compile Include="Crypto\Pbkdf2Tests.cs" />
     <Compile Include="Crypto\ScryptTests.cs" />
     <Compile Include="Crypto\Secp256k1Tests.cs" />
     <Compile Include="Crypto\SignaturesTests.cs" />
     <Compile Include="Encoding\Encoders.cs" />
-    <Compile Include="Math\BigIntegerTests.cs" />
     <Compile Include="TestUtils.cs" />
     <Compile Include="Encoding\Base58Tests.cs" />
     <Compile Include="Crypto\FakeRandom.cs" />
@@ -108,6 +110,9 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Math\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

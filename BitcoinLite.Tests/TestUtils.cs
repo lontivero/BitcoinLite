@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using BitcoinLite.Crypto;
 using BitcoinLite.Encoding;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace BitcoinLite.Tests
@@ -155,5 +156,39 @@ namespace BitcoinLite.Tests
 				});
 			}
 		}
+
+		public static IEnumerable base58_keys_invalid
+		{
+			get
+			{
+				return JsonFile.GetData("base58_keys_invalid.json").Select(line => {
+					var tc = new TestCaseData(line);
+					tc.SetName("Invalid Key - " + (string)line[0]);
+					return tc;
+				});
+			}
+		}
+
+		public static IEnumerable base58_keys_valid
+		{
+			get
+			{
+				foreach (var line in JsonFile.GetData("base58_keys_valid.json"))
+				{
+					var wif = (string)line[0];
+					var bytes = Encoders.Hex.GetBytes((string)line[1]);
+					var metadata = (JObject)line[2];
+					var tc = new TestCaseData(
+						wif, bytes, 
+						(string)metadata["isPrivkey"] == "True", 
+						(string)metadata["isTestnet"] == "True", 
+						(string)metadata["addrType"],
+						(string)metadata["isCompressed"] == "True");
+					tc.SetName("Valid Key - " + wif);
+					yield return tc;
+				}
+			}
+		}
+
 	}
 }

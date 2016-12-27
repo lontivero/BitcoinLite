@@ -17,6 +17,36 @@ namespace BitcoinLite.Tests.Crypto
 			Assert.Throws<ArgumentException>(() => new Key(arr));
 		}
 
+		[Test, TestCaseSource(typeof(TestDataFactory), nameof(TestDataFactory.base58_keys_invalid))]
+		public void InvalidKey(string s)
+		{
+			Assert.Throws<FormatException>(() => Key.Parse(s));
+			Assert.Throws<FormatException>(() => Address.FromString(s));
+		}
+
+		[Test, TestCaseSource(typeof(TestDataFactory), nameof(TestDataFactory.base58_keys_valid))]
+		public void ValidKey(string wif, byte[] bytes, bool isPrivateKey, bool isTestnet, string addrType, bool isCompressed)
+		{
+			var network = isTestnet ? Network.Test : Network.Main;
+			if (isPrivateKey)
+			{
+				var key = new Key(bytes, isCompressed);
+				Assert.AreEqual(wif, key.ToString(network));
+			}
+			else
+			{
+				Address addr=null;
+				if(addrType=="pubkey")
+					addr = new PubKeyHashAddress(network, bytes);
+				else if (addrType == "script")
+					addr = new ScriptHashAddress(network, bytes);
+				else
+					Assert.Fail($"unknown address type: '{addrType}' for '{wif}'");
+
+				Assert.AreEqual(wif, addr.ToString());
+				Assert.AreEqual(addr.Destination.ToByteArray(), bytes);
+			}
+		}
 
 		[Test]
 		[TestCase("0000000000000000000000000000000000000000000000000000000000000000", TestName = "PrivateKey - Is Zero (out of range)")]
@@ -80,8 +110,8 @@ namespace BitcoinLite.Tests.Crypto
 				Assert.AreEqual(address.ScriptPubKey.ToString(), privateKey.PubKey.ToAddress(Network.Main).ScriptPubKey.ToString());
 				Assert.True(privateKey.PubKey.IsCanonical);
 				Assert.AreEqual(test.Address, privateKey.PubKey.ToString(Network.Main));
-				Assert.AreEqual(address.Destination.ScriptPubKey.ToString(), privateKey.PubKey.Hash.ScriptPubKey.ToString());
-				Assert.AreEqual(address.Destination.ScriptPubKey.ToString(), new KeyId(privateKey.PubKey).ScriptPubKey.ToString());
+				Assert.AreEqual(address.ScriptPubKey.ToString(), privateKey.PubKey.Hash.ScriptPubKey.ToString());
+				Assert.AreEqual(address.ScriptPubKey.ToString(), new KeyId(privateKey.PubKey).ScriptPubKey.ToString());
 
 				var compressedPrivKey = new Key(privateKey.ToByteArray(), true);
 				Assert.AreEqual(test.CompressedPrivateKeyWIF, compressedPrivKey.ToString(Network.Main));
@@ -93,8 +123,29 @@ namespace BitcoinLite.Tests.Crypto
 				var compressedAddr = Address.FromString(test.CompressedAddress);
 				Assert.AreEqual(KeyId.Parse(test.CompressedHash160), compressedAddr.Destination);
 				Assert.AreEqual(KeyId.Parse(test.CompressedHash160), compressedPrivKey.PubKey.Hash);
-				Assert.AreEqual(compressedAddr.Destination.ScriptPubKey.ToString(), compressedPrivKey.PubKey.Hash.ScriptPubKey.ToString());
+				Assert.AreEqual(compressedAddr.ScriptPubKey.ToString(), compressedPrivKey.PubKey.Hash.ScriptPubKey.ToString());
 			}
 		}
+	}
+
+	[TestFixture(Category = "Address")]
+	public class DestinationTests
+	{
+		[Test]
+		public void GetHashCodeTest()
+		{
+			var hash = Key.Create().PubKey.Hash.ToByteArray();
+			var id = new KeyId(hash);
+			Assert.AreEqual(hash.GetHashCode(), id.GetHashCode());
+		}
+
+		[Test]
+		public void ParseTest()
+		{
+			var hash = Encoders.Hex.GetString(Key.Create().PubKey.Hash.ToByteArray());
+			var id = KeyId.Parse(hash);
+			Assert.AreEqual(hash, id.ToString());
+		}
+
 	}
 }

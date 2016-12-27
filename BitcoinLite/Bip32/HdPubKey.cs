@@ -59,15 +59,15 @@ namespace BitcoinLite.Bip32
 				throw new InvalidOperationException("Cannot create a hardened child key from public child derivation");
 
 			var pubKey = PubKey.ToByteArray();
-			var salt = Packer.Pack("bIA", pubKey[0], index, pubKey.Slice(1));
-			var i = Hashes.HMACSHA256(ChainCode, salt);
+			var salt = Packer.Pack("bA^I", pubKey[0], pubKey.Slice(1), index);
+			var i = Hashes.HMACSHA512(ChainCode, salt);
 
 			var il = i.Slice(0, KeyLength);
 			var ir = i.Slice(KeyLength, ChainCodeLength);
 			var childCodeChain = ir;
 			Key.CheckValidKey(il);
 
-			var parse256il = il.ToBigIntegerUnsigned(false);
+			var parse256il = il.ToBigIntegerUnsigned(true);
 
 			var q = (Secp256k1.G * parse256il) + PubKey.Point;
 			if (q.IsInfinity)

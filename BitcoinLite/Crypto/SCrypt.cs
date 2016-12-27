@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using BitcoinLite.Utils;
 
 namespace BitcoinLite.Crypto
@@ -20,23 +22,29 @@ namespace BitcoinLite.Crypto
 			Ensure.That(nameof(N), ()=> N <= int.MaxValue / BlockSize / r, "Parameter N is too large");
 			Ensure.That(nameof(N), () => r <= int.MaxValue / BlockSize / p, "Parameter r is too large");
 
-			//var mac = ;
 			var pbkdf2Single = new Pbkdf2(new HMACSHA256(passwd), salt, 1);
 			var B = pbkdf2Single.GetBytes(p * BlockSize * r);
 
-			var XY = new byte[2 * BlockSize * r];
-			var V = new byte[BlockSize * r * N];
-
-			for (var i = 0; i<p; i++) {
-				Smix(B, i* BlockSize * r, r, N, V, XY);
+			var tasks = new Task[p];
+			for (var j = 0; j < p; j++)
+			{
+				var j1 = j;
+				tasks[j] = Task.Run(() =>
+				{
+					Smix(B, j1*BlockSize*r, r, N);
+				});
 			}
-
+			Task.WaitAll(tasks);
+			
 			pbkdf2Single = new Pbkdf2(new HMACSHA256(passwd), B, 1);
 			return pbkdf2Single.GetBytes(dkLen);
 		}
 
-		public static void Smix(byte[] B, int Bi, int r, int N, byte[] V, byte[] XY)
+		public static void Smix(byte[] B, int Bi, int r, int N)
 		{
+			var XY = new byte[2 * BlockSize * r];
+			var V = new byte[BlockSize * r * N];
+
 			var xi = 0;
 			var yi = BlockSize * r;
 

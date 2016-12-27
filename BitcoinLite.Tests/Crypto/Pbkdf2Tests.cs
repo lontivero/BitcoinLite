@@ -5,15 +5,15 @@ using NUnit.Framework;
 
 namespace BitcoinLite.Tests.Crypto
 {
-	[TestFixture(Category = "Crypto")]
+	[TestFixture(Category = "Crypto,Pbkdf2")]
 	public class Pbkdf2Tests
 	{
-		[TestCase("admin",    "palomaherrera",  1000, 10, TestName = "")]
-		[TestCase("admin",    "palomaherrera",  2000, 13, TestName = "")]
-		[TestCase("admin",    "palomaherrera", 10000, 20, TestName = "")]
-		[TestCase("password", "saltlakecity",   1000, 21, TestName = "")]
-		[TestCase("password", "saltlakecity",   2000, 57, TestName = "")]
-		[TestCase("password", "saltlakecity",  10000, 500, TestName = "")]
+		[TestCase("admin",    "palomaherrera",  1000, 10, TestName = "Pbkdf2-Rfc2898 admin:palomaherrera:1000:10")]
+		[TestCase("admin",    "palomaherrera",  2000, 13, TestName = "Pbkdf2-Rfc2898 admin:palomaherrera:1000:13")]
+		[TestCase("admin",    "palomaherrera", 10000, 20, TestName = "Pbkdf2-Rfc2898 admin:palomaherrera:10000:20")]
+		[TestCase("password", "saltlakecity",   1000, 21, TestName = "Pbkdf2-Rfc2898 password:saltlakecity:1000:21")]
+		[TestCase("password", "saltlakecity",   2000, 57, TestName = "Pbkdf2-Rfc2898 password:saltlakecity:2000:57")]
+		[TestCase("password", "saltlakecity",  10000, 500, TestName= "Pbkdf2-Rfc2898 password:saltlakecity:10000:500")]
 		public void ComparisonTest(string password, string salt, int iterations, int bytes)
 		{
 			var _pass = System.Text.Encoding.UTF8.GetBytes(password);

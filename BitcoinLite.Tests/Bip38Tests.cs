@@ -6,10 +6,10 @@ using NUnit.Framework;
 
 namespace BitcoinLite.Tests
 {
-	[TestFixture(Category = "Crypto")]
-	public class EncryptedKeyTests
+	[TestFixture(Category = "Crypto, Bip32")]
+	public class Bip38Tests
 	{
-		[Test]
+		[Test(Description = "Encrypt and Decrypt Private Key")]
 		public void CanEncryptAndDecrypt()
 		{
 			var key = Key.Parse("5Hx15HFGyep2CfPxsJKe2fXJsCVn5DEiyoeGGF6JZjGbTRnqfiD").ToByteArray();
@@ -62,15 +62,13 @@ namespace BitcoinLite.Tests
 			"KwYgW8gcxj1JWJXhPSu4Fqwzfhp5Yfi42mdYmMa4XqK7NJxXUSK7",
 			true
 			)]
-		[Parallelizable(ParallelScope.Self)]
 		public void EncryptedKeyNoEC(string passphrase, string encrypted, string unencrypted, bool compressed)
 		{
 			var key = Key.Parse(unencrypted);
 			var encryptedKey = new EncryptedKey(key, passphrase, Network.Main);
 			Assert.AreEqual(encrypted, encryptedKey.ToString());
 
-			var actualKey = encryptedKey.GetKey(passphrase + "wrong");
-			Assert.Throws<InvalidOperationException>(()=> actualKey.ToString(Network.Main));
+			Assert.Throws<InvalidOperationException>(() => encryptedKey.GetKey(passphrase + "wrong"));
 		}
 	}
 }

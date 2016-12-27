@@ -32,7 +32,7 @@ namespace BitcoinLite.Bip38
 		private static byte[] GetEncryptedBytes(Key key, string passphrase, Network network)
 		{
 			var addresshash = AddressHashForKey(key, network);
-			var derived = GetDerivedKey(System.Text.Encoding.UTF8.GetBytes(passphrase), addresshash, 32);
+			var derived = GetDerivedKey(System.Text.Encoding.UTF8.GetBytes(passphrase), addresshash, 64);
 			var encrypted = EncryptKey(key.ToByteArray(), derived);
 
 			byte flagByte = 0;
@@ -47,14 +47,14 @@ namespace BitcoinLite.Bip38
 			return SCrypt.Hash(password, salt, 16384, 8, 8, dkLen);
 		}
 
-		private static byte[] Encrypt(Key key, string passphrase, Network network)
-		{
-			var addresshash = AddressHashForKey(key, network);
+		//private static byte[] Encrypt(Key key, string passphrase, Network network)
+		//{
+		//	var addresshash = AddressHashForKey(key, network);
 
-			var derived = GetDerivedKey(System.Text.Encoding.UTF8.GetBytes(passphrase), addresshash, 64);
-			var encrypted = EncryptKey(key.ToByteArray(), derived);
-			return encrypted;
-		}
+		//	var derived = GetDerivedKey(System.Text.Encoding.UTF8.GetBytes(passphrase), addresshash, 64);
+		//	var encrypted = EncryptKey(key.ToByteArray(), derived);
+		//	return encrypted;
+		//}
 
 		private static byte[] AddressHashForKey(Key key, Network network)
 		{

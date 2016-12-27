@@ -91,7 +91,8 @@ namespace BitcoinLite
 		{
 			get
 			{
-				Ensure.InRange(nameof(index), index, 0, Size);
+				if (index < 0 || index >= Size)
+					throw new IndexOutOfRangeException($"Allowed values are beetwen 0 and {Size - 1}");
 
 				var uintIndex = index / sizeof(uint);
 				var byteIndex = index%sizeof (uint);
@@ -436,8 +437,8 @@ namespace BitcoinLite
 		{
 			get
 			{
-				if(index < 0 || index >= Size )
-					throw new IndexOutOfRangeException("index");
+				if (index < 0 || index >= Size)
+					throw new IndexOutOfRangeException($"Allowed values are beetwen 0 and {Size - 1}");
 				var uintIndex = index/sizeof (uint);
 				var byteIndex = index%sizeof (uint);
 				var value = _data[uintIndex];

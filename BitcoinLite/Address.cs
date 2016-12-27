@@ -18,7 +18,7 @@ namespace BitcoinLite
 		ConfirmationCode
 	}
 
-	public class Address : IBinarySerializable
+	public abstract class Address : IBinarySerializable
 	{
 		protected readonly byte[] Bytes;
 		public Network Network { get; }
@@ -28,22 +28,23 @@ namespace BitcoinLite
 			Network network;
 			DataTypePrefix type;
 			var bytes = Base58Data.FromString(wif, out network, out type);
+			if(bytes.Length != 20)
+				throw new FormatException("An address has to have 20 bytes");
 
-			return new Address(network, type, bytes);
+			if (type == DataTypePrefix.PublicKeyHash)
+				return new PubKeyHashAddress(network, bytes);
+			if (type == DataTypePrefix.ScriptHash)
+				return new ScriptHashAddress(network, bytes);
+			throw new NotSupportedException("not supported address type");
 		}
 
-		public Address(Network network, DataTypePrefix type, byte[] hash)
+		protected Address(Network network, byte[] hash)
 		{
 			Ensure.NotNull(nameof(network), network);
 			Ensure.NotNull(nameof(hash), hash);
-			if (type != DataTypePrefix.PublicKeyHash && type != DataTypePrefix.ScriptHash)
-				throw new NotSupportedException("not supported address type");
-			//if (pubKeyHash.Length != 32)
-			//	throw new ArgumentException("pubKeyHash must be a 32 byte length array");
-
+			Ensure.That(nameof(hash), ()=>hash.Length == 20, "An address has to have 20 bytes");
 			Network = network;
 			Bytes = hash;
-			Type = type;
 		}
 
 		public byte[] ToByteArray()
@@ -51,25 +52,11 @@ namespace BitcoinLite
 			return Network.GetPrefixBytes(Type).Concat(Bytes);
 		}
 
-		public Script ScriptPubKey => Destination.ScriptPubKey;
+		public Script ScriptPubKey => Script.FromAddress(this);
 
-		public DataTypePrefix Type
-		{
-			get;
-		}
+		public abstract DataTypePrefix Type { get; }
 
-		public ITxDestination Destination
-		{
-			get
-			{
-				if (Type == DataTypePrefix.PublicKeyHash)
-					return new KeyId(Bytes);
-				if (Type == DataTypePrefix.ScriptHash)
-					return new ScriptId(Bytes);
-
-				return (ITxDestination)null;
-			}
-		}
+		public abstract TxDestination Destination { get; }
 
 		public override string ToString()
 		{
@@ -77,27 +64,27 @@ namespace BitcoinLite
 		}
 	}
 
-	//public class PubKeyHashAddress : Address
-	//{
-	//	public PubKeyHashAddress(Network network, byte[] hash) 
-	//		: base(network, hash)
-	//	{
-	//	}
+	public class PubKeyHashAddress : Address
+	{
+		public PubKeyHashAddress(Network network, byte[] hash)
+			: base(network, hash)
+		{
+		}
 
-	//	public PubKeyId PubKeyHash => new PubKeyId(Bytes);
-	//	public override Script ScriptPubKey() => Script.FromAddress(this);
-	//	public override DataTypePrefix Type => DataTypePrefix.PublicKeyHash;
-	//}
+		public KeyId PubKeyHash => new KeyId(Bytes);
+		public override DataTypePrefix Type => DataTypePrefix.PublicKeyHash;
+		public override TxDestination Destination => PubKeyHash;
+	}
 
-	//public class ScriptHashAddress : Address
-	//{
-	//	public ScriptHashAddress(Network network, byte[] hash)
-	//		: base(network, hash)
-	//	{
-	//	}
+	public class ScriptHashAddress : Address
+	{
+		public ScriptHashAddress(Network network, byte[] hash)
+			: base(network, hash)
+		{
+		}
 
-	//	public ScriptId ScriptHash => new ScriptId(Bytes);
-	//	public override Script ScriptPubKey() => Script.FromAddress(this);
-	//	public override DataTypePrefix Type => DataTypePrefix.ScriptHash;
-	//}
+		public ScriptId ScriptHash => new ScriptId(Bytes);
+		public override DataTypePrefix Type => DataTypePrefix.ScriptHash;
+		public override TxDestination Destination => ScriptHash;
+	}
 }

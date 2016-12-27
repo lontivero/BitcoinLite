@@ -80,7 +80,7 @@ namespace BitcoinLite.Tests.Crypto
 			var XY = new byte[2 *  128* 1];
 			var V = new byte[128 * 1 * 16];
 
-			SCrypt.Smix(input, 0, 1, 16, V, XY);
+			SCrypt.Smix(input, 0, 1, 16);
 			CollectionAssert.AreEqual(output, input);
 		}
 
@@ -103,26 +103,20 @@ namespace BitcoinLite.Tests.Crypto
 			d5 43 29 55 61 3f 0f cf 62 d4 97 05 24 2a 9a f9
 			e6 1e 85 dc 0d 65 1e 40 df cf 01 7b 45 57 58 87",
 			TestName = "scrypt(P= 'pleaseletmein', S= 'SodiumChloride', r= 1048576, N= 8, p= 1, dkLen= 64)")]
-		[TestCase("pleaseletmein", "SodiumChloride", 8, 1048576, 1, 64, @"
-			21 01 cb 9b 6a 51 1a ae ad db be 09 cf 70 f8 81
-			ec 56 8d 57 4a 2f fd 4d ab e5 ee 98 20 ad aa 47
-			8e 56 fd 8f 4b a5 d0 9f fa 1c 6d 92 7c 40 f4 c3
-			37 30 40 49 e8 a9 52 fb cb f4 5c 6f a7 7a 41 a4",
-			TestName = "scrypt (P='pleaseletmein', S='SodiumChloride', r = 1048576, N = 8, p = 1, dkLen = 64)")]
+		//[TestCase("pleaseletmein", "SodiumChloride", 8, 1048576, 1, 64, @"
+		//	21 01 cb 9b 6a 51 1a ae ad db be 09 cf 70 f8 81
+		//	ec 56 8d 57 4a 2f fd 4d ab e5 ee 98 20 ad aa 47
+		//	8e 56 fd 8f 4b a5 d0 9f fa 1c 6d 92 7c 40 f4 c3
+		//	37 30 40 49 e8 a9 52 fb cb f4 5c 6f a7 7a 41 a4",
+		//	TestName = "scrypt (P='pleaseletmein', S='SodiumChloride', r = 1048576, N = 8, p = 1, dkLen = 64)")]
 		public void Test(string P, string S, int r, int N, int p, int dkLen, string expectedStr)
 		{
 			var password = System.Text.Encoding.ASCII.GetBytes(P);
 			var salt = System.Text.Encoding.ASCII.GetBytes(S);
-			try
-			{
-				var hash = SCrypt.Hash(password, salt, N, r, p, dkLen);
+			var hash = SCrypt.Hash(password, salt, N, r, p, dkLen);
 			
-				var expected = Encoders.Hex.GetBytes(expectedStr.Clean());
-				CollectionAssert.AreEqual(expected, hash);
-			}
-			catch (OutOfMemoryException)
-			{
-			}
+			var expected = Encoders.Hex.GetBytes(expectedStr.Clean());
+			CollectionAssert.AreEqual(expected, hash);
 		}
 	}
 }

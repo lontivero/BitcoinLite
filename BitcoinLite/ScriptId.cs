@@ -3,15 +3,11 @@ using BitcoinLite.Utils;
 
 namespace BitcoinLite
 {
-	public class ScriptId : ITxDestination, IBinarySerializable
+	public class ScriptId : TxDestination
 	{
-		private readonly byte[] _hash;
-
 		public ScriptId(byte[] hash)
+			: base(hash)
 		{
-			Ensure.NotNull(nameof(hash), hash);
-			Ensure.That(nameof(hash), ()=>hash.Length == uint160.Size);
-			_hash = hash;
 		}
 
 		public ScriptId(Script script)
@@ -19,16 +15,11 @@ namespace BitcoinLite
 		{
 		}
 
-		public Script ScriptPubKey => Script.FromScriptId(this);
+		public override Script ScriptPubKey => Script.FromScriptId(this);
 
 		public Address GetAddress(Network network)
 		{
-			return new Address(network, DataTypePrefix.ScriptHash, ToByteArray());
-		}
-
-		public byte[] ToByteArray()
-		{
-			return _hash.CloneByteArray();
+			return new ScriptHashAddress(network, Bytes);
 		}
 
 		public override bool Equals(object obj)
@@ -38,13 +29,7 @@ namespace BitcoinLite
 
 		protected bool Equals(ScriptId other)
 		{
-			return other != null && _hash.IsEqualTo(other._hash);
+			return other != null && Bytes.IsEqualTo(other.Bytes);
 		}
-
-		public override int GetHashCode()
-		{
-			return _hash.GetHashCode();
-		}
-
 	}
 }

@@ -60,10 +60,10 @@ namespace BitcoinLite.Structures
 		public BlockHeader Header	{ get; internal set; }
 
 		// Block transactions, in format of "tx" command
-		public IReadOnlyList<Transaction> Transactions	{ get; internal set; }
+		public List<Transaction> Transactions	{ get; internal set; }
 
 				 
-		public Block(BlockHeader header, IReadOnlyList<Transaction> transactions)
+		public Block(BlockHeader header, List<Transaction> transactions)
 		{
 			if(header == null) throw new ArgumentNullException(nameof(header)); 
 			if(transactions == null) throw new ArgumentNullException(nameof(transactions)); 
@@ -91,16 +91,16 @@ namespace BitcoinLite.Structures
 		public uint Version	{ get; internal set; }
 
 		// A list of 1 or more transaction inputs or sources for coins
-		public IReadOnlyList<TxIn> Inputs	{ get; internal set; }
+		public List<TxIn> Inputs	{ get; internal set; }
 
 		// A list of 1 or more transaction outputs or destinations for coins
-		public IReadOnlyList<TxOut> Outputs	{ get; internal set; }
+		public List<TxOut> Outputs	{ get; internal set; }
 
 		// 
 		public uint LockTime	{ get; internal set; }
 
 				 
-		public Transaction(uint version, IReadOnlyList<TxIn> inputs, IReadOnlyList<TxOut> outputs, uint lock_time)
+		public Transaction(uint version, List<TxIn> inputs, List<TxOut> outputs, uint lock_time)
 		{
 			if(inputs == null) throw new ArgumentNullException(nameof(inputs)); 
 			if(outputs == null) throw new ArgumentNullException(nameof(outputs)); 

@@ -670,7 +670,7 @@ namespace BitcoinLite
 
 		public static Script FromAddress(Address address)
 		{
-			return address.ScriptPubKey;
+			return address.Destination.ScriptPubKey;
 		}
 
 		public static Script FromPubKey(PubKey publicKey)

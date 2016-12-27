@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom;
 using System.Numerics;
 using BitcoinLite.Bip38;
 using BitcoinLite.Encoding;
@@ -14,9 +15,17 @@ namespace BitcoinLite.Crypto
 
 		public static Key Parse(string wif)
 		{
-			var key = Base58Data.FromString(wif);
-			var isCompressed = key.Length > 32 && key[32] == 0x01;
-			return new Key(key.Slice(0, 32), isCompressed);
+			Network network;
+			DataTypePrefix type;
+			var bytes = Base58Data.FromString(wif, out network, out type);
+			if (type != DataTypePrefix.PrivateKey)
+				throw new FormatException("No private key format");
+			var isCompressed = bytes.Length == 33 && bytes[32] == 0x01;
+			var valid = bytes.Length == 32 || (isCompressed && bytes.Length == 33);
+			if (!valid)
+				throw new FormatException("No private key format");
+			var key = isCompressed ? bytes.Slice(0,32) : bytes;
+			return new Key(key, isCompressed);
 		}
 
 		public static Key Create()

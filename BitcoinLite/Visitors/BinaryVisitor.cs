@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BitcoinLite.Structures;
+using BitcoinLite.Utils;
 
 namespace BitcoinLite.Visitors
 {
@@ -39,7 +40,12 @@ namespace BitcoinLite.Visitors
 
 		private static object SerializeTransaction(IVisitable arg)
 		{
-			throw new NotImplementedException();
+			var tx = arg as Transaction;
+			foreach (var input in tx.Inputs)
+			{
+				
+			}
+			return Packer.Pack("II", tx.Version, tx.Inputs.Count);
 		}
 
 		private static object SerializeBlockHeader(IVisitable arg)

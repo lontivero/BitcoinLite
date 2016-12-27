@@ -6,10 +6,6 @@ namespace BitcoinLite.Crypto
 {
 	public class Base58Data
 	{
-		private Base58Data()
-		{
-		}
-
 		public static byte[] FromString(string wif)
 		{
 			Network network;
@@ -31,11 +27,10 @@ namespace BitcoinLite.Crypto
 			return Encoders.Base58Check.GetString(prefix.Concat(wif));
 		}
 
-		public static string ToString(byte[] wif, DataTypePrefix type)
-		{
-			var prefix = Network.Main.GetPrefixBytes(type); // bytes that doesnt depend on any network
-			return Encoders.Base58Check.GetString(prefix.Concat(wif));
-		}
-
+		//public static string ToString(byte[] wif, DataTypePrefix type)
+		//{
+		//	var prefix = Network.Main.GetPrefixBytes(type); // bytes that doesnt depend on any network
+		//	return Encoders.Base58Check.GetString(prefix.Concat(wif));
+		//}
 	}
 }

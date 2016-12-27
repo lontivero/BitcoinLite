@@ -48,7 +48,7 @@ namespace BitcoinLite.Tests.Crypto
 	[TestFixture(Category = "Address,Bitcoin,Crypto")]
 	public class PubKeyHashAddressTests
 	{
-		[Test]
+		[Test(Description = "Create PubKey Address: key.PubKey.ToAddress")]
 		public void CanCreateAddress()
 		{
 			var hash = Hashes.SHA256(new byte[] { 0x01 });
@@ -59,7 +59,7 @@ namespace BitcoinLite.Tests.Crypto
 			Assert.AreEqual("1ApqRi7vWrh3gR4jJ6LXhAXRKWTu55mrqP", str);
 		}
 
-		[Test]
+		[Test(Description = "Create PubKey Address: Address.FromString(wif)")]
 		public void CanCreateAddress2()
 		{
 			var address = Address.FromString("1ApqRi7vWrh3gR4jJ6LXhAXRKWTu55mrqP");
@@ -67,7 +67,7 @@ namespace BitcoinLite.Tests.Crypto
 			Assert.AreEqual("1ApqRi7vWrh3gR4jJ6LXhAXRKWTu55mrqP", address.ToString());
 		}
 
-		[Test]
+		[Test(Description = "Create PubKey Address: key.PubKey.ToAddress")]
 		public void CanCreateAddress3()
 		{
 			var priv = Key.Parse("KzmL119KUWwg7XkeznvFwHo1qnyLZ4Ap9S326HsomBq9H3PmicRN");
@@ -79,7 +79,7 @@ namespace BitcoinLite.Tests.Crypto
 	[TestFixture(Category = "Address,Bitcoin,Crypto")]
 	public class ScriptHashAddressTests
 	{
-		[Test]
+		[Test(Description = "Create Script Address: key.PubKey.ScriptPubKey.Hash.GetAddress")]
 		public void CanCreateAddress()
 		{
 			var hash = Hashes.SHA256(new byte[] { 0x01 });
@@ -88,7 +88,7 @@ namespace BitcoinLite.Tests.Crypto
 			Assert.AreEqual("31xfAbnULrmQH5wyjtgjbrTP47PJ48MY3T", address.ToString());
 		}
 
-		[Test]
+		[Test(Description = "Create Script Address: Address.FromString(wif)")]
 		public void CanCreateAddress2()
 		{
 			var address = Address.FromString("1ApqRi7vWrh3gR4jJ6LXhAXRKWTu55mrqP");
@@ -96,7 +96,7 @@ namespace BitcoinLite.Tests.Crypto
 			Assert.AreEqual("1ApqRi7vWrh3gR4jJ6LXhAXRKWTu55mrqP", address.ToString());
 		}
 
-		[Test]
+		[Test(Description = "Create Script Address: key.PubKey.ToAddress")]
 		public void CanCreateAddress3()
 		{
 			var priv = Key.Parse("KzmL119KUWwg7XkeznvFwHo1qnyLZ4Ap9S326HsomBq9H3PmicRN");

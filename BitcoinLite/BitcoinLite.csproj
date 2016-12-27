@@ -40,8 +40,6 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="Base58Data.cs" />
-    <Compile Include="MyBigInteger.cs" />
-    <Compile Include="Crypto\Math\BigInteger.cs" />
     <Compile Include="ITxDestination.cs" />
     <Compile Include="Crypto\SCrypt.cs" />
     <Compile Include="Crypto\ECDSASignature.cs" />

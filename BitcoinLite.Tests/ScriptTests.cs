@@ -16,17 +16,17 @@ namespace BitcoinLite.Tests
 			                       "OP_ENDIF";
 	
 			var s1 = Script.FromAsm(script1);
-			Assert.AreEqual(script1, s1.ToString());
+			Assert.AreEqual(script1, s1.ToAsm());
 			var s2 = Script.FromAsm(script2);
-			Assert.AreEqual(script2, s2.ToString());
+			Assert.AreEqual(script2, s2.ToAsm());
 
 			var hash = Hashes.SHA256(new byte[] { 0x01 });
 			var privateKey = new Key(hash);
 			var publicKey = privateKey.PubKey;
 			var script = publicKey.ScriptPubKey;
 			var expected = "02d415b187c6e7ce9da46ac888d20df20737d6f16a41639e68ea055311e1535dd9 OP_CHECKSIG";
-			Assert.AreEqual(expected, script.ToString());
-			Assert.AreEqual(expected, Script.FromAsm(expected).ToString());
+			Assert.AreEqual(expected, script.ToAsm());
+			Assert.AreEqual(expected, Script.FromAsm(expected).ToAsm());
 		}
 
 		[Test]

@@ -129,7 +129,7 @@ public static IEnumerable<string[]> Details(string[] fields)
 {
 	foreach(var p in fields){
 		var xx = p.Split(';').Select(x=>x.Trim()).ToArray();
-		if(xx[2].EndsWith("[]")) xx[2] = "IReadOnlyList<" + xx[2].Replace("[]", "") + ">";
+		if(xx[2].EndsWith("[]")) xx[2] = "List<" + xx[2].Replace("[]", "") + ">";
 		if(!xx[1].EndsWith("_count") && !xx[1].EndsWith("_length"))
 		yield return xx;
 	}
