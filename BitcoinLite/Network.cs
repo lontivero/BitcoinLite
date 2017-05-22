@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BitcoinLite.Crypto;
 using BitcoinLite.Utils;
 
 namespace BitcoinLite
@@ -34,7 +33,9 @@ namespace BitcoinLite
 				{ DataTypePrefix.EncryptedKeyEC, new byte[] { 0x01, 0x43 } },
 				{ DataTypePrefix.EncryptedKeyNoEC, new byte[] { 0x01, 0x42 } },
 				{ DataTypePrefix.PassphraseCode, new byte[] { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } },
-				{ DataTypePrefix.ConfirmationCode, new byte[] { 0x64, 0x3b, 0xf6, 0xa8, 0x9a } }
+				{ DataTypePrefix.ConfirmationCode, new byte[] { 0x64, 0x3b, 0xf6, 0xa8, 0x9a } },
+				{ DataTypePrefix.SegWitPublicKeyHash, new byte[] { 0x06 } },
+				{ DataTypePrefix.SegWitScriptHash, new byte[] { 0x0a } },
 			};
 
 			network._rewardHalvingBlocks = 210 * 1000; // ~4 years
@@ -55,7 +56,9 @@ namespace BitcoinLite
 				{ DataTypePrefix.EncryptedKeyEC, new byte[] { 0x01, 0x43 } },
 				{ DataTypePrefix.EncryptedKeyNoEC, new byte[] { 0x01, 0x42 } },
 				{ DataTypePrefix.PassphraseCode, new byte[] { 0x2c, 0xe9, 0xb3, 0xe1, 0xff, 0x39, 0xe2 } },
-				{ DataTypePrefix.ConfirmationCode, new byte[] { 0x64, 0x3b, 0xf6, 0xa8, 0x9a } }
+				{ DataTypePrefix.ConfirmationCode, new byte[] { 0x64, 0x3b, 0xf6, 0xa8, 0x9a } },
+				{ DataTypePrefix.SegWitPublicKeyHash, new byte[] { 0x03 } },
+				{ DataTypePrefix.SegWitScriptHash, new byte[] { 0x28 } },
 			};
 
 			network._rewardHalvingBlocks = 150; // ~25 hours
@@ -74,7 +77,9 @@ namespace BitcoinLite
 				{ DataTypePrefix.ExtPublicKey, new byte[] { 0x04, 0x35, 0x87, 0xcf } },
 				{ DataTypePrefix.ExtPrivateKey, new byte[] { 0x04, 0x35, 0x83, 0x94 } },
 				{ DataTypePrefix.EncryptedKeyEC, new byte[] { 0x01, 0x43 } },
-				{ DataTypePrefix.EncryptedKeyNoEC, new byte[] { 0x01, 0x42 } }
+				{ DataTypePrefix.EncryptedKeyNoEC, new byte[] { 0x01, 0x42 } },
+				{ DataTypePrefix.SegWitPublicKeyHash, new byte[] { 0x03 } },
+				{ DataTypePrefix.SegWitScriptHash, new byte[] { 0x28 } },
 			};
 
 			network._rewardHalvingBlocks = 210 * 1000; // ~4 years

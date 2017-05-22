@@ -171,7 +171,7 @@ namespace BitcoinLite.Utils
 
 				if (_next + group.Length > _buffer.Length)
 				{
-					var nb = new byte[System.Math.Max(_next, 16) * 2 + group.Length];
+					var nb = new byte[Math.Max(_next, 16) * 2 + group.Length];
 					Array.Copy(_buffer, nb, _buffer.Length);
 					Array.Copy(group, 0, nb, _next, group.Length);
 					_next = _next + group.Length;

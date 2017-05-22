@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using BitcoinLite.Crypto;
 using BitcoinLite.Encoding;
 using BitcoinLite.Utils;
-using System.Text;
+using BitcoinLite.Structures;
 
 namespace BitcoinLite
 {
+	public enum SigHash : uint
+	{
+		Undefined = 0,
+		All = 1,
+		None = 2,
+		Single = 3,
+		AnyoneCanPay = 0x80,
+	};
+
 	public enum Opcode : byte
 	{
 		#region Push Value
@@ -650,6 +658,37 @@ namespace BitcoinLite
 			return Opcode.OP_0 <= opcode && opcode <= Opcode.OP_16 && opcode != Opcode.OP_RESERVED;
 		}
 
+		public static bool operator ==(Op op1, Op op2)
+		{
+			if (((object)op1 == null) && ((object)op2 == null))
+				return true;
+
+			if (((object)op1 == null) || ((object)op2 == null))
+				return false;
+
+			return op1.Equals(op2);
+		}
+
+		public static bool operator !=(Op op1, Op op2)
+		{
+			return !(op1 == op2);
+		}
+
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj) || Equals(obj as KeyId);
+		}
+
+		protected bool Equals(Op other)
+		{
+			return Opcode == other.Opcode && Equals(Data, other.Data);
+		}
+
+		public override int GetHashCode()
+		{
+				return ((int) Opcode*397) ^ (Data?.GetHashCode() ?? 0);
+		}
+
 		public override string ToString()
 		{
 			var opcodeName = Enum.GetName(typeof(Opcode), Opcode);
@@ -662,7 +701,7 @@ namespace BitcoinLite
 		}
 	}
 
-	public class Script : IBinarySerializable
+	public class Script : IBinarySerializable, IVisitable
 	{
 		public static readonly Script Empty = new Script();
 
@@ -692,7 +731,19 @@ namespace BitcoinLite
 		public static Script FromPubKeyHash(KeyId keyId)
 		{
 			var pubKeyHash = Encoders.Hex.GetString(keyId.ToByteArray());
-			return FromAsm($"{pubKeyHash} OP_CHECKSIG");
+			return FromAsm($"OP_DUP OP_HASH160 {pubKeyHash} OP_EQUALVERIFY OP_CHECKSIG");
+		}
+
+		public static Script FromSegWitHash(SegWitKeyId keyId)
+		{
+			var pubKeyHash = Encoders.Hex.GetString(keyId.ToByteArray());
+			return  FromAsm($"OP_0 {pubKeyHash}");
+		}
+
+		public static Script FromSegWitScriptHash(SegWitScriptId keyId)
+		{
+			var pubKeyHash = Encoders.Hex.GetString(keyId.ToByteArray());
+			return FromAsm($"OP_0 {pubKeyHash}");
 		}
 
 		public static Script FromScriptId(ScriptId scriptId)
@@ -722,14 +773,66 @@ namespace BitcoinLite
 				}
 
 				var opcodevi = (Opcode)token[0];
-				if (opcodevi > 0 && opcodevi < Opcode.OP_PUSHDATA1)
-				{
+			//	if (opcodevi > 0 && opcodevi < Opcode.OP_PUSHDATA1)
+			//	{
 					var val = Encoders.Hex.GetBytes(token);
 					writer.WriteData(val);
-				}
+			//	}
 			}
 			
 			return new Script(stream.ToArray());
+		}
+
+		public static byte[] SignatureHash(Script script, Transaction txTo, int inIdx, SigHash hashtype)
+		{
+			Ensure.InRange(nameof(inIdx), inIdx, 0, txTo.Inputs.Count);
+
+			var tx = txTo.Clone();
+			foreach (var input in tx.Inputs)
+			{
+				input.ScriptSig = Empty;
+			}
+
+			tx.Inputs[inIdx].ScriptSig = FindAndDelete(script, new Op(Opcode.OP_CODESEPARATOR));
+
+			switch (hashtype)
+			{
+				case SigHash.None:
+					tx.Outputs.Clear();
+
+					foreach (var input in tx.Inputs.Where((x, i) => i != inIdx))
+					{
+						input.Sequence = 0;
+					}
+					break;
+				case SigHash.Single:
+					var outIdx = inIdx;
+
+					if (outIdx >= tx.Outputs.Count)
+						throw new IndexOutOfRangeException();
+
+					var output = tx.Outputs[outIdx];
+					tx.Outputs.Clear();
+
+					for (var i = 0; i < outIdx; i++)
+					{
+						tx.Outputs.Add(new TxOut());
+					}
+					tx.Outputs.Add(output);
+
+					foreach (var input in tx.Inputs.Where((x, i) => i != inIdx))
+					{
+						input.Sequence = 0;
+					}
+					break;
+				case SigHash.AnyoneCanPay:
+					var theInput = tx.Inputs[inIdx];
+					tx.Inputs = new List<TxIn> { theInput };
+					break;
+			}
+
+			var s = Packer.Pack("AI", tx.ToByteArray(), hashtype);
+			return Hashes.Hash256(s);
 		}
 
 		public Script()
@@ -769,19 +872,14 @@ namespace BitcoinLite
 
 		public string ToAsm()
 		{
-			var sb = new StringBuilder();
-			foreach(var opcode in ToOpcodes())
-			{
-				sb.Append(opcode);
-				sb.Append(" ");
-			}
-			var s = sb.ToString();
-			return s.Substring(0, s.Length - 1);
+			return string.Join(" ", ToOpcodes().Select(x => x.ToString()));
 		}
 
-		public static Script FromHex(string str)
+		internal static Script FindAndDelete(Script script, Op o)
 		{
-			return Empty;
+			var ops = script.ToOpcodes().Where(op => op !=o);
+			var asm = string.Join(" ", ops.Select(x => x.ToString()));
+			return FromAsm(asm);
 		}
 
 		public byte[] ToByteArray()
@@ -797,7 +895,7 @@ namespace BitcoinLite
 
 	class ScriptReader
 	{
-		private BinaryReader _reader;
+		private readonly BinaryReader _reader;
 
 		public ScriptReader(Stream stream)
 		{
@@ -806,11 +904,10 @@ namespace BitcoinLite
 
 		public Op ReadOp()
 		{
-			Opcode opcode;
 			if (_reader.BaseStream.Position == _reader.BaseStream.Length)
 				return null;
 
-			opcode = (Opcode)_reader.ReadByte();
+			var opcode = (Opcode)_reader.ReadByte();
 
 			if (opcode > Opcode.OP_0 && opcode < Opcode.OP_PUSHDATA1)
 			{
@@ -843,7 +940,7 @@ namespace BitcoinLite
 
 	class ScriptWriter
 	{
-		private BinaryWriter _writer;
+		private readonly BinaryWriter _writer;
 
 		public ScriptWriter(Stream stream)
 		{

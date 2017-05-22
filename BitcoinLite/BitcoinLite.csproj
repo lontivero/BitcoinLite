@@ -40,6 +40,7 @@
   <ItemGroup>
     <Compile Include="Address.cs" />
     <Compile Include="Base58Data.cs" />
+    <Compile Include="Crypto\SchnorrSigner.cs" />
     <Compile Include="ITxDestination.cs" />
     <Compile Include="Crypto\SCrypt.cs" />
     <Compile Include="Crypto\ECDSASignature.cs" />
@@ -68,13 +69,12 @@
     <Compile Include="Structures\Block.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Structures\Blockchain.cs">
-      <DependentUpon>Blockchain.tt</DependentUpon>
-      <SubType>Code</SubType>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
+    <Compile Include="Structures\BlockHeader.cs" />
+    <Compile Include="Structures\OutPoint.cs" />
     <Compile Include="Structures\Target.cs" />
+    <Compile Include="Structures\Transaction.cs" />
+    <Compile Include="Structures\TxIn.cs" />
+    <Compile Include="Structures\TxOut.cs" />
     <Compile Include="Utils\ByteArrays.cs" />
     <Compile Include="Utils\DateTimeExtensions.cs" />
     <Compile Include="Utils\Ensure.cs" />
@@ -84,15 +84,13 @@
     <Compile Include="UInt.160.256.cs" />
     <Compile Include="Utils\ArrayExtensions.cs" />
     <Compile Include="Visitors\BinaryVisitor.cs" />
+    <Compile Include="Visitors\JsonVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Structures\Blockchain.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Blockchain.cs</LastGenOutput>
-    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

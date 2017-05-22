@@ -21,7 +21,6 @@ namespace BitcoinLite.Tests.Crypto
 		public void InvalidKey(string s)
 		{
 			Assert.Throws<FormatException>(() => Key.Parse(s));
-			Assert.Throws<FormatException>(() => Address.FromString(s));
 		}
 
 		[Test, TestCaseSource(typeof(TestDataFactory), nameof(TestDataFactory.base58_keys_valid))]
@@ -36,10 +35,14 @@ namespace BitcoinLite.Tests.Crypto
 			else
 			{
 				Address addr=null;
-				if(addrType=="pubkey")
+				if (addrType == "pubkey")
 					addr = new PubKeyHashAddress(network, bytes);
 				else if (addrType == "script")
 					addr = new ScriptHashAddress(network, bytes);
+				else if (addrType == "p2wpkh")
+					addr = new SegWitPubKeyHashAddress(network, bytes);
+				else if (addrType == "p2wsh")
+					addr = new SegWitScriptHashAddress(network, bytes);
 				else
 					Assert.Fail($"unknown address type: '{addrType}' for '{wif}'");
 

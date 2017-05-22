@@ -14,10 +14,11 @@ namespace BitcoinLite
 		public KeyId(byte[] hash)
 			: base(hash)
 		{
+			Ensure.That(nameof(hash), () => hash.Length == uint160.Size);
 		}
 
 		public KeyId(PubKey pubKey)
-			: this(Hashes.RIPEMD160(Hashes.SHA256(pubKey.ToByteArray())))
+			: this(Hashes.Hash160(pubKey.ToByteArray()))
 		{
 		}
 
@@ -27,15 +28,26 @@ namespace BitcoinLite
 		{
 			return new PubKeyHashAddress(network, Bytes);
 		}
+	}
 
-		protected bool Equals(KeyId other)
+	public class SegWitKeyId : TxDestination
+	{
+		public static SegWitKeyId Parse(string hex)
 		{
-			return other != null && Bytes.IsEqualTo(other.Bytes);
+			return new SegWitKeyId(Encoders.Hex.GetBytes(hex));
 		}
 
-		public override bool Equals(object obj)
+		public SegWitKeyId(byte[] hash)
+			: base(hash)
 		{
-			return ReferenceEquals(this, obj) || Equals(obj as KeyId);
+			Ensure.That(nameof(hash), () => hash.Length == uint160.Size);
+		}
+
+		public override Script ScriptPubKey => Script.FromSegWitHash(this);
+
+		public Address GetAddress(Network network)
+		{
+			return new SegWitPubKeyHashAddress(network, Bytes);
 		}
 	}
 }

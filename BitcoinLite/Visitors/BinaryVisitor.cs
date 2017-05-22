@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using BitcoinLite.Structures;
 using BitcoinLite.Utils;
 
@@ -7,8 +8,8 @@ namespace BitcoinLite.Visitors
 {
 	public static class BinaryVisitor
 	{
-		private static readonly Dictionary<Type, Func<IVisitable, object>> Methods
-			= new Dictionary<Type, Func<IVisitable, object>> {
+		private static readonly Dictionary<Type, Action<IVisitable, BinaryWriter>> Methods
+			= new Dictionary<Type, Action<IVisitable, BinaryWriter>> {
 				{ typeof(Block), SerializeBlock },
 				{ typeof(BlockHeader), SerializeBlockHeader },
 				{ typeof(Transaction), SerializeTransaction },
@@ -18,49 +19,60 @@ namespace BitcoinLite.Visitors
 				{ typeof(OutPoint), SerializeOutPoint },
 			};
 
-		private static object SerializeOutPoint(IVisitable arg)
+		private static void SerializeOutPoint(IVisitable arg, BinaryWriter writer)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static object SerializeTxOut(IVisitable arg)
+		private static void SerializeTxOut(IVisitable arg, BinaryWriter writer)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static object SerializeTxIn(IVisitable arg)
+		private static void SerializeTxIn(IVisitable arg, BinaryWriter writer)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static object SerializeTarget(IVisitable arg)
+		private static void SerializeTarget(IVisitable arg, BinaryWriter writer)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static object SerializeTransaction(IVisitable arg)
+		private static void SerializeTransaction(IVisitable arg, BinaryWriter writer)
 		{
 			var tx = arg as Transaction;
+			writer.Write(tx.Version);
+			writer.Write(tx.Inputs.Count);
 			foreach (var input in tx.Inputs)
 			{
-				
+				SerializeTxIn(input, writer);
 			}
-			return Packer.Pack("II", tx.Version, tx.Inputs.Count);
+			writer.Write(tx.Outputs.Count);
+			foreach (var output in tx.Outputs)
+			{
+				SerializeTxOut(output, writer);
+			}
+
+			//return Packer.Pack("II", tx.Version, tx.Inputs.Count);
 		}
 
-		private static object SerializeBlockHeader(IVisitable arg)
+		private static void SerializeBlockHeader(IVisitable arg, BinaryWriter writer)
 		{
 			throw new NotImplementedException();
 		}
 
-		private static object SerializeBlock(IVisitable arg)
+		private static void SerializeBlock(IVisitable arg, BinaryWriter writer)
 		{
 			throw new NotImplementedException();
 		}
 
 		public static byte[] ToByteArray(this IVisitable arg)
 		{
-			return (byte[])Methods[arg.GetType()](arg);
+			var stream = new MemoryStream();
+			var writer = new BinaryWriter(stream);
+			Methods[arg.GetType()](arg, writer);
+			return stream.ToArray();
 		}
 	}
 }

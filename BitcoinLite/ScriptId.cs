@@ -8,10 +8,11 @@ namespace BitcoinLite
 		public ScriptId(byte[] hash)
 			: base(hash)
 		{
+			Ensure.That(nameof(hash), () => hash.Length == uint160.Size);
 		}
 
 		public ScriptId(Script script)
-			: this(Hashes.RIPEMD160(Hashes.SHA256(script.ToByteArray())))
+			: this(Hashes.Hash160(script.ToByteArray()))
 		{
 		}
 
@@ -21,15 +22,26 @@ namespace BitcoinLite
 		{
 			return new ScriptHashAddress(network, Bytes);
 		}
+	}
 
-		public override bool Equals(object obj)
+	public class SegWitScriptId : TxDestination
+	{
+		public SegWitScriptId(byte[] hash)
+			: base(hash)
 		{
-			return ReferenceEquals(this, obj) || Equals(obj as ScriptId);
+			Ensure.That(nameof(hash), () => hash.Length == uint256.Size);
 		}
 
-		protected bool Equals(ScriptId other)
+		public SegWitScriptId(Script script)
+			: this(Hashes.Hash160(script.ToByteArray()))
 		{
-			return other != null && Bytes.IsEqualTo(other.Bytes);
+		}
+
+		public override Script ScriptPubKey => Script.FromSegWitScriptHash(this);
+
+		public Address GetAddress(Network network)
+		{
+			return new SegWitScriptHashAddress(network, Bytes);
 		}
 	}
 }

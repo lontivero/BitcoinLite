@@ -15,7 +15,7 @@ namespace BitcoinLite.Encoding
 			var toEncode = new byte[count + 4];
 			Buffer.BlockCopy(data, offset, toEncode, 0, count);
 
-			var hash = Hashes.SHA256d(data, offset, count);
+			var hash = Hashes.Hash256(data, offset, count);
 			Buffer.BlockCopy(hash, 0, toEncode, count, 4);
 
 			return InternalEncoder.GetString(toEncode, 0, toEncode.Length);
@@ -27,7 +27,7 @@ namespace BitcoinLite.Encoding
 			if (vchRet.Length < 4)
 				throw new FormatException("Invalid checked base 58 string");
 			
-			var calculatedHash = Hashes.SHA256d(vchRet, 0, vchRet.Length - 4).Slice(0, 4);
+			var calculatedHash = Hashes.Hash256(vchRet, 0, vchRet.Length - 4).Slice(0, 4);
 			var expectedHash = vchRet.Slice(vchRet.Length - 4, 4);
 
 			if (!calculatedHash.IsEqualTo(expectedHash))

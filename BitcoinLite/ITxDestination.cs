@@ -1,7 +1,7 @@
 using BitcoinLite.Encoding;
 using BitcoinLite.Utils;
 
-namespace BitcoinLite.Crypto
+namespace BitcoinLite
 {
 	public interface ITxDestination
 	{
@@ -15,8 +15,7 @@ namespace BitcoinLite.Crypto
 		protected TxDestination(byte[] bytes)
 		{
 			Ensure.NotNull(nameof(bytes), bytes);
-			Ensure.That(nameof(bytes), () => bytes.Length == uint160.Size);
-
+			Ensure.That("bytes", () => bytes.Length > 0);
 			Bytes = bytes;
 		}
 
@@ -36,5 +35,15 @@ namespace BitcoinLite.Crypto
 		{
 			return Encoders.Hex.GetString(Bytes);
 		}
+		public override bool Equals(object obj)
+		{
+			return ReferenceEquals(this, obj) || Equals(obj as TxDestination);
+		}
+
+		private bool Equals(TxDestination other)
+		{
+			return other != null && Bytes.IsEqualTo(other.Bytes);
+		}
+
 	}
 }

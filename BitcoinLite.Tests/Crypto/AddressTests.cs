@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Numerics;
 using BitcoinLite.Crypto;
 using BitcoinLite.Encoding;
 using NUnit.Framework;

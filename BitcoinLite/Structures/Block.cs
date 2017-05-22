@@ -2,27 +2,42 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using BitcoinLite.Crypto;
-using BitcoinLite.Utils;
 
 namespace BitcoinLite.Structures
 {
-	public interface IVisitable
+	public class Block : IVisitable
 	{
+		// The block header
+		public BlockHeader Header { get; internal set; }
+
+		// Block transactions, in format of "tx" command
+		public List<Transaction> Transactions { get; internal set; }
+
+
+		public Block(BlockHeader header, List<Transaction> transactions)
+		{
+			if (header == null) throw new ArgumentNullException(nameof(header));
+			if (transactions == null) throw new ArgumentNullException(nameof(transactions));
+
+			Header = header;
+			Transactions = transactions;
+		}
+
+		//		public static Block FromByteArray(byte[] bytes)
+		//		{
+		//			var mem = new MemoryStream(bytes);
+		//			var reader = new BlockchainReader(new BitcoinBinaryReader(mem));
+		//			return reader.ReadBlock();
+		//		}
+
+		//		public static Block Parse(string hex)
+		//		{
+		//			return FromByteArray(Encoders.Hex.GetBytes(hex));
+		//		}
 	}
 
-	public partial class BlockHeader
+	public interface IVisitable
 	{
-		private uint256 _hash;
-
-		public uint256 Hash => _hash ?? (_hash = new uint256(Hashes.SHA256d(this.ToByteArray())));
-
-		public DateTimeOffset BlockTime => Timestamp.ToDateTimeOffset();
-
-		public bool CheckProofOfWork()
-		{
-			return Hash <= Bits.AsTargetHash();
-		}
 	}
 
 	//public partial class Block
@@ -74,170 +89,7 @@ namespace BitcoinLite.Structures
 	//	}
 	//}
 
-	public partial class Transaction
-	{
-		private uint256 _hash;
 
-		public uint256 Hash => _hash ?? (_hash = new uint256(Hashes.SHA256d(this.ToByteArray())));
-
-		public long TotalOut
-		{
-			get
-			{
-				return Outputs.Sum(v => v.Value);
-			}
-		}
-
-		/*
-		public uint256 GetSignatureHash(Script scriptPubKey, int nIn, SigHash sigHash = SigHash.All)
-		{
-			return Inputs.AsIndexedInputs().ToArray()[nIn].GetSignatureHash(scriptPubKey, sigHash);
-		}
-
-		public TransactionSignature SignInput(ISecret secret, Script scriptPubKey, int nIn, SigHash sigHash = SigHash.All)
-		{
-			return SignInput(secret.PrivateKey, scriptPubKey, nIn, sigHash);
-		}
-
-		public TransactionSignature SignInput(PrivateKey key, Script scriptPubKey, int nIn, SigHash sigHash = SigHash.All)
-		{
-			return Inputs.AsIndexedInputs().ToArray()[nIn].Sign(key, scriptPubKey, sigHash);
-		}
-		*/
-
-		public bool IsCoinBase => (Inputs.Count == 1 && Inputs[0].PreviousOutput.IsNull);
-	}
-
-	public partial class TxIn
-	{
-		public TxIn(Script sigScript)
-			: this(sigScript, uint.MaxValue)
-		{
-		}
-
-		public TxIn(Script sigScript, uint sequence)
-		{
-			if (sigScript == null) throw new ArgumentNullException("sigScript");
-			SigScript = sigScript;
-			Sequence = sequence;
-			PreviousOutput = OutPoint.None;
-		}
-
-		public TxIn(OutPoint prevout)
-		{
-			Ensure.NotNull(nameof(prevout), prevout);
-			SigScript = Script.Empty;
-			Sequence = uint.MaxValue;
-			PreviousOutput = prevout;
-		}
-
-		//public bool IsFrom(PublicKey pubKey)
-		//{
-		//	var result = PayToPubkeyHashTemplate.Instance.ExtractScriptSigParameters(SigScript);
-		//	return result != null && result.PublicKey == pubKey;
-		//}
-	}
-
-	public partial class TxOut
-	{
-		//public TxOut(long value, IDestination destination)
-		//{
-		//	Value = value;
-		//	ScriptPubKey = destination.ScriptPubKey;
-		//}
-
-		//public TxOut(long value, Script scriptPubKey)
-		//{
-		//	Value = value;
-		//	ScriptPubKey = scriptPubKey;
-		//}
-
-		public TxOut()
-		{
-			Value = 0;
-		}
-
-		public bool IsNull => Value == -1;
-
-		public bool IsDust => ((1000 * Value) / (3 * (this.ToByteArray().Length + 148)) < ProtocolConstants.MinRelayTxFee);
-
-		//public bool IsTo(IDestination destination)
-		//{
-		//	return ScriptPubKey == destination.ScriptPubKey;
-		//}
-	}
-
-	public partial class OutPoint : IComparable<OutPoint>
-	{
-		public static readonly OutPoint None = new OutPoint(uint256.Zero, 0);
-
-		public OutPoint(Transaction tx, uint i)
-			: this(tx.Hash, i)
-		{
-		}
-
-		public bool IsNull => Hash == 0 && Index == 0;
-
-		public static bool operator <(OutPoint a, OutPoint b)
-		{
-			return a.CompareTo(b) < 0;
-		}
-		public static bool operator >(OutPoint a, OutPoint b)
-		{
-			return a.CompareTo(b) > 0;
-		}
-
-		public static bool operator ==(OutPoint a, OutPoint b)
-		{
-			if (ReferenceEquals(a, null))
-			{
-				return ReferenceEquals(b, null);
-			}
-			if (ReferenceEquals(b, null))
-			{
-				return false;
-			}
-			return a.CompareTo(b) == 0;
-		}
-
-		public static bool operator !=(OutPoint a, OutPoint b)
-		{
-			return !(a == b);
-		}
-
-		public override bool Equals(object obj)
-		{
-			return Equals(obj as OutPoint);
-		}
-
-		public bool Equals(OutPoint outpoint)
-		{
-			if (ReferenceEquals(outpoint, null))
-				return false;
-			return outpoint.CompareTo(this) == 0;
-		}
-
-		public override int GetHashCode()
-		{
-			return Tuple.Create(Hash, Index).GetHashCode();
-		}
-
-		public int CompareTo(OutPoint other)
-		{
-			var hashDiff = Hash - other.Hash;
-			if(hashDiff == 0)
-			{
-				return (int)Index - (int)other.Index;
-			}
-			return hashDiff > 0 ? 1 : -1;
-		}
-
-		public override string ToString()
-		{
-			return Index + "-" + Hash;
-		}
-
-	}
 
 	public static class BinarySerializableExtensions
 	{

@@ -59,7 +59,7 @@ namespace BitcoinLite.Bip38
 		private static byte[] AddressHashForKey(Key key, Network network)
 		{
 			var addressBytes = Encoders.ASCII.GetBytes(key.PubKey.ToAddress(network).ToString());
-			var addresshash = Hashes.SHA256d(addressBytes).Slice(0, 4);
+			var addresshash = Hashes.Hash256(addressBytes).Slice(0, 4);
 			return addresshash;
 		}
 

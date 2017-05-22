@@ -15,7 +15,9 @@ namespace BitcoinLite
 		EncryptedKeyEC,
 		EncryptedKeyNoEC,
 		PassphraseCode,
-		ConfirmationCode
+		ConfirmationCode,
+		SegWitPublicKeyHash,
+		SegWitScriptHash,
 	}
 
 	public abstract class Address : IBinarySerializable
@@ -31,10 +33,17 @@ namespace BitcoinLite
 			if(bytes.Length != 20)
 				throw new FormatException("An address has to have 20 bytes");
 
-			if (type == DataTypePrefix.PublicKeyHash)
-				return new PubKeyHashAddress(network, bytes);
-			if (type == DataTypePrefix.ScriptHash)
-				return new ScriptHashAddress(network, bytes);
+			switch (type)
+			{
+				case DataTypePrefix.PublicKeyHash:
+					return new PubKeyHashAddress(network, bytes);
+				case DataTypePrefix.ScriptHash:
+					return new ScriptHashAddress(network, bytes);
+				case DataTypePrefix.SegWitPublicKeyHash:
+					return new SegWitPubKeyHashAddress(network, bytes);
+				case DataTypePrefix.SegWitScriptHash:
+					return new SegWitScriptHashAddress(network, bytes);
+			}
 			throw new NotSupportedException("not supported address type");
 		}
 
@@ -42,7 +51,7 @@ namespace BitcoinLite
 		{
 			Ensure.NotNull(nameof(network), network);
 			Ensure.NotNull(nameof(hash), hash);
-			Ensure.That(nameof(hash), ()=>hash.Length == 20, "An address has to have 20 bytes");
+			//Ensure.That(nameof(hash), ()=>hash.Length == 20, "An address has to have 20 bytes");
 			Network = network;
 			Bytes = hash;
 		}
@@ -86,5 +95,29 @@ namespace BitcoinLite
 		public ScriptId ScriptHash => new ScriptId(Bytes);
 		public override DataTypePrefix Type => DataTypePrefix.ScriptHash;
 		public override TxDestination Destination => ScriptHash;
+	}
+
+	public class SegWitPubKeyHashAddress : Address
+	{
+		public SegWitPubKeyHashAddress(Network network, byte[] hash)
+			: base(network, new []{ (byte)Opcode.OP_0, (byte)0x00 }.Concat(hash))
+		{
+		}
+
+		public SegWitKeyId SegWitPubKeyHash => new SegWitKeyId(Bytes.Slice(2, 20));
+		public override DataTypePrefix Type => DataTypePrefix.SegWitPublicKeyHash;
+		public override TxDestination Destination => SegWitPubKeyHash;
+	}
+
+	public class SegWitScriptHashAddress : Address
+	{
+		public SegWitScriptHashAddress(Network network, byte[] hash)
+			: base(network, new[] { (byte)Opcode.OP_0, (byte)0x00 }.Concat(hash))
+		{
+		}
+
+		public SegWitScriptId SegWitScriptHash => new SegWitScriptId(Bytes.Slice(2, 32));
+		public override DataTypePrefix Type => DataTypePrefix.SegWitScriptHash;
+		public override TxDestination Destination => SegWitScriptHash;
 	}
 }
