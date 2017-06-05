@@ -1,5 +1,4 @@
 using System;
-using BitcoinLite.Crypto;
 using BitcoinLite.Encoding;
 using BitcoinLite.Utils;
 
@@ -75,6 +74,11 @@ namespace BitcoinLite
 
 	public class PubKeyHashAddress : Address
 	{
+		public PubKeyHashAddress(byte[] hash)
+			: this(Network.Current, hash)
+		{
+		}
+
 		public PubKeyHashAddress(Network network, byte[] hash)
 			: base(network, hash)
 		{
@@ -87,6 +91,10 @@ namespace BitcoinLite
 
 	public class ScriptHashAddress : Address
 	{
+		public ScriptHashAddress(byte[] hash)
+			: this(Network.Current, hash)
+		{
+		}
 		public ScriptHashAddress(Network network, byte[] hash)
 			: base(network, hash)
 		{
@@ -99,6 +107,10 @@ namespace BitcoinLite
 
 	public class SegWitPubKeyHashAddress : Address
 	{
+		public SegWitPubKeyHashAddress(byte[] hash)
+			: this(Network.Current, hash)
+		{
+		}
 		public SegWitPubKeyHashAddress(Network network, byte[] hash)
 			: base(network, new []{ (byte)Opcode.OP_0, (byte)0x00 }.Concat(hash))
 		{
@@ -111,6 +123,10 @@ namespace BitcoinLite
 
 	public class SegWitScriptHashAddress : Address
 	{
+		public SegWitScriptHashAddress(byte[] hash)
+			: this(Network.Current, hash)
+		{
+		}
 		public SegWitScriptHashAddress(Network network, byte[] hash)
 			: base(network, new[] { (byte)Opcode.OP_0, (byte)0x00 }.Concat(hash))
 		{

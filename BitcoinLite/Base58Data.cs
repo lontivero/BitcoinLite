@@ -32,9 +32,8 @@ namespace BitcoinLite
 
 		public static string ToString(byte[] wif, DataTypePrefix type)
 		{
-			var prefix = Network.Main.GetPrefixBytes(type); // bytes that doesnt depend on any network
+			var prefix = Network.Current.GetPrefixBytes(type);
 			return Encoders.Base58Check.GetString(prefix.Concat(wif));
 		}
-
 	}
 }

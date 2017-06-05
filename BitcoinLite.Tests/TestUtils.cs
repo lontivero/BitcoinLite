@@ -169,25 +169,40 @@ namespace BitcoinLite.Tests
 			}
 		}
 
-		public static IEnumerable base58_keys_valid
+		public static IEnumerable base58_keys_valid_bitcoin
 		{
 			get
 			{
 				foreach (var line in JsonFile.GetData("base58_keys_valid.json"))
 				{
-					var wif = (string)line[0];
-					var bytes = Encoders.Hex.GetBytes((string)line[1]);
-					var metadata = (JObject)line[2];
-					var tc = new TestCaseData(
-						wif, bytes, 
-						(string)metadata["isPrivkey"] == "True", 
-						(string)metadata["isTestnet"] == "True", 
-						(string)metadata["addrType"],
-						(string)metadata["isCompressed"] == "True");
-					tc.SetName("Valid Key - " + wif);
-					yield return tc;
+					yield return ParseTestLine(line);
 				}
 			}
+		}
+
+		public static IEnumerable base58_keys_valid_litecoin
+		{
+			get
+			{
+				foreach (var line in JsonFile.GetData("base58_keys_valid_litecoin.json"))
+				{
+					yield return ParseTestLine(line);
+				}
+			}
+		}
+		private static object ParseTestLine(object[] line)
+		{
+			var wif = (string)line[0];
+			var bytes = Encoders.Hex.GetBytes((string)line[1]);
+			var metadata = (JObject)line[2];
+			var tc = new TestCaseData(
+				wif, bytes,
+				(string)metadata["isPrivkey"] == "True",
+				(string)metadata["isTestnet"] == "True",
+				(string)metadata["addrType"],
+				(string)metadata["isCompressed"] == "True");
+			tc.SetName("Valid Key - " + wif);
+			return tc;
 		}
 
 	}

@@ -85,5 +85,10 @@ namespace BitcoinLite.Bip32
 		{
 			return Base58Data.ToString(ToByteArray(), DataTypePrefix.ExtPublicKey, network);
 		}
+
+		public override string ToString()
+		{
+			return ToString(Network.Current);
+		}
 	}
 }

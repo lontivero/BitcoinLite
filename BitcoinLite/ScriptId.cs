@@ -1,5 +1,4 @@
 using BitcoinLite.Crypto;
-using BitcoinLite.Utils;
 
 namespace BitcoinLite
 {
@@ -18,7 +17,7 @@ namespace BitcoinLite
 
 		public override Script ScriptPubKey => Script.FromScriptId(this);
 
-		public Address GetAddress(Network network)
+		public override Address GetAddress(Network network)
 		{
 			return new ScriptHashAddress(network, Bytes);
 		}
@@ -39,7 +38,7 @@ namespace BitcoinLite
 
 		public override Script ScriptPubKey => Script.FromSegWitScriptHash(this);
 
-		public Address GetAddress(Network network)
+		public override Address GetAddress(Network network)
 		{
 			return new SegWitScriptHashAddress(network, Bytes);
 		}

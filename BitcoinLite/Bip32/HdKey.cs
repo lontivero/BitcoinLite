@@ -151,6 +151,11 @@ namespace BitcoinLite.Bip32
 		{
 			return Base58Data.ToString(ToByteArray(), DataTypePrefix.ExtPrivateKey, network);
 		}
+
+		public override string ToString()
+		{
+			return ToString(Network.Current);
+		}
 	}
 
 	public static class KeyPath

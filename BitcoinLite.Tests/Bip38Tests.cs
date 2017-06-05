@@ -47,11 +47,11 @@ namespace BitcoinLite.Tests
 		public void EncryptedSecretNoECmultiply(string passphrase, string encrypted, string unencrypted, bool compressed)
 		{
 			var key = Key.Parse(unencrypted);
-			var encryptedKey = new EncryptedKey(key, passphrase, Network.Main);
+			var encryptedKey = new EncryptedKey(key, passphrase, Network.BitcoinMain);
 			Assert.AreEqual(encrypted, encryptedKey.ToString());
 
 			var actualKey = encryptedKey.GetKey(passphrase);
-			Assert.AreEqual(unencrypted, actualKey.ToString(Network.Main));
+			Assert.AreEqual(unencrypted, actualKey.ToString(Network.BitcoinMain));
 
 			Assert.AreEqual(compressed, actualKey.IsCompressed);
 		}
@@ -65,7 +65,7 @@ namespace BitcoinLite.Tests
 		public void EncryptedKeyNoEC(string passphrase, string encrypted, string unencrypted, bool compressed)
 		{
 			var key = Key.Parse(unencrypted);
-			var encryptedKey = new EncryptedKey(key, passphrase, Network.Main);
+			var encryptedKey = new EncryptedKey(key, passphrase, Network.BitcoinMain);
 			Assert.AreEqual(encrypted, encryptedKey.ToString());
 
 			Assert.Throws<InvalidOperationException>(() => encryptedKey.GetKey(passphrase + "wrong"));

@@ -115,6 +115,11 @@
   <ItemGroup>
     <Folder Include="Math\" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="_Resources\base58_keys_valid_litecoin.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

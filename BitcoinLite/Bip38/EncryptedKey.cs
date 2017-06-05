@@ -12,6 +12,11 @@ namespace BitcoinLite.Bip38
 		private readonly bool _isCompressed;
 		private readonly Network _network;
 
+		public EncryptedKey(Key key, string passphrase)
+			: this(key, passphrase, Network.Current)
+		{
+		}
+
 		public EncryptedKey(Key key, string passphrase, Network network)
 		{
 			_bytes = GetEncryptedBytes(key, passphrase, network);

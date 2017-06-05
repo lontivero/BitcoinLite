@@ -18,7 +18,7 @@ namespace BitcoinLite.Tests
 			var childKey = key.Derive(1);
 
 			var recovered = childKey.GetParentExtKey(pubkey);
-			Assert.AreEqual(recovered.ToString(Network.Main), key.ToString(Network.Main));
+			Assert.AreEqual(recovered.ToString(Network.BitcoinMain), key.ToString(Network.BitcoinMain));
 
 			childKey = key.Derive((uint)int.MaxValue + 1);
 			Assert.Throws<InvalidOperationException>(() => childKey.GetParentExtKey(pubkey));
@@ -35,7 +35,7 @@ namespace BitcoinLite.Tests
 				var key = new HdKey().Derive(i);
 				var childKey = key.Derive(i);
 				var recovered = childKey.GetParentExtKey(key.Neuter);
-				Assert.AreEqual(recovered.ToString(Network.Main), key.ToString(Network.Main));
+				Assert.AreEqual(recovered.ToString(Network.BitcoinMain), key.ToString(Network.BitcoinMain));
 			}
 		}
 
@@ -128,8 +128,8 @@ namespace BitcoinLite.Tests
 					data = pubkey.ToByteArray();
 					Assert.AreEqual(74, data.Length);
 
-					Assert.AreEqual(derive.Prv, key.ToString(Network.Main));
-					Assert.AreEqual(derive.Pub, pubkey.ToString(Network.Main));
+					Assert.AreEqual(derive.Prv, key.ToString(Network.BitcoinMain));
+					Assert.AreEqual(derive.Pub, pubkey.ToString(Network.BitcoinMain));
 
 					// Derive new keys
 					var keyNew = key.Derive(derive.Child);
@@ -138,7 +138,7 @@ namespace BitcoinLite.Tests
 					{
 						// Compare with public derivation
 						var pubkeyNew2 = pubkey.Derive(derive.Child);
-						Assert.AreEqual(pubkeyNew.ToString(Network.Main), pubkeyNew2.ToString(Network.Main));
+						Assert.AreEqual(pubkeyNew.ToString(Network.BitcoinMain), pubkeyNew2.ToString(Network.BitcoinMain));
 					}
 					key = keyNew;
 					pubkey = pubkeyNew;

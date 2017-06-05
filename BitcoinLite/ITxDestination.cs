@@ -45,5 +45,11 @@ namespace BitcoinLite
 			return other != null && Bytes.IsEqualTo(other.Bytes);
 		}
 
+		public abstract Address GetAddress(Network network);
+
+		public Address GetAddress()
+		{
+			return GetAddress(Network.Current);
+		}
 	}
 }
