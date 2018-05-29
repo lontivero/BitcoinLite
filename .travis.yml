@@ -1,0 +1,24 @@
+language: csharp
+mono: none
+dotnet: 2.0.2
+
+notifications:
+  email: false
+
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+    - os: osx
+
+# branches to build
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+  - $HOME/.nuget/packages
+
+script:
+  - dotnet test

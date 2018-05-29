@@ -1,0 +1,14 @@
+configuration:
+  - Release
+
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+cache:
+- '%USERPROFILE%\.nuget\packages -> **\*.csproj'
+
+build_script:
+  - dotnet build
+
+test_script:
+  - dotnet test
