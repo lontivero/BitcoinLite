@@ -21,4 +21,4 @@ cache:
   - $HOME/.nuget/packages
 
 script:
-  - dotnet test BitcoinLite.Tests/BitcoinLite.Tests.csproj
+  - dotnet test --verbosity normal BitcoinLite.Tests/BitcoinLite.Tests.csproj
