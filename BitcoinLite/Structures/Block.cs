@@ -23,17 +23,6 @@ namespace BitcoinLite.Structures
 			Transactions = transactions;
 		}
 
-		//		public static Block FromByteArray(byte[] bytes)
-		//		{
-		//			var mem = new MemoryStream(bytes);
-		//			var reader = new BlockchainReader(new BitcoinBinaryReader(mem));
-		//			return reader.ReadBlock();
-		//		}
-
-		//		public static Block Parse(string hex)
-		//		{
-		//			return FromByteArray(Encoders.Hex.GetBytes(hex));
-		//		}
 	}
 
 	public interface IVisitable

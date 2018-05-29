@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Security.Cryptography;
 
 namespace BitcoinLite.Crypto
 {
@@ -9,11 +10,6 @@ namespace BitcoinLite.Crypto
 		{
 			return SHA256(data, 0, data.Length);
 		}
-
-		//public static byte[] SHA256(byte[] data, int count)
-		//{
-		//	return SHA256(data, 0, count);
-		//}
 
 		public static byte[] SHA256(byte[] data, int offset, int count)
 		{
@@ -29,11 +25,6 @@ namespace BitcoinLite.Crypto
 		{
 			return RIPEMD160(data, 0, data.Length);
 		}
-
-		//public static byte[] RIPEMD160(byte[] data, int count)
-		//{
-		//	return RIPEMD160(data, 0, count);
-		//}
 
 		public static byte[] RIPEMD160(byte[] data, int offset, int count)
 		{
@@ -51,11 +42,6 @@ namespace BitcoinLite.Crypto
 			return Hash256(data, 0, data.Length);
 		}
 
-		//public static byte[] SHA256d(byte[] data, int count)
-		//{
-		//	return SHA256d(data, 0, count);
-		//}
-
 		public static byte[] Hash256(byte[] data, int offset, int count)
 		{
 			var h = SHA256(data, offset, count);
@@ -68,11 +54,6 @@ namespace BitcoinLite.Crypto
 		{
 			return Hash160(data, 0, data.Length);
 		}
-
-		//public static byte[] Hash160(byte[] data, int count)
-		//{
-		//	return Hash160(data, 0, count);
-		//}
 
 		public static byte[] Hash160(byte[] data, int offset, int count)
 		{
@@ -96,6 +77,5 @@ namespace BitcoinLite.Crypto
 				return hmac.ComputeHash(data);
 			}
 		}
-
 	}
 }

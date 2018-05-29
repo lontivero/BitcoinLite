@@ -32,10 +32,11 @@ namespace NBitcoin.Structures
 
 		public Block Build()
 		{
-			var txHashes = from tx in _transactions select tx.Hash;
-			var merkleRoot = MerkleNode.GetRoot(txHashes);
-			var header = new BlockHeader(Version, PreviousBlockHash, merkleRoot.Hash, Utils.DateTimeToUnixTime(Timestamp), Target, Nonce);
-			return new Block(header, _transactions);
+			throw new NotImplementedException();
+			// var txHashes = from tx in _transactions select tx.Hash;
+			// var merkleRoot = MerkleNode.GetRoot(txHashes);
+			// var header = new BlockHeader(Version, PreviousBlockHash, merkleRoot.Hash, Utils.DateTimeToUnixTime(Timestamp), Target, Nonce);
+			// return new Block(header, _transactions);
 		}
 	}
 }
