@@ -5,10 +5,10 @@ configuration:
 skip_branch_with_pr: true
 
 cache:
-- '%USERPROFILE%\.nuget\packages -> **\*.csproj'
+- '%USERPROFILE%/.nuget\packages -> **\*.csproj'
 
 build_script:
   - dotnet build
 
 test_script:
-  - dotnet test
+  - dotnet test BitcoinLite.Tests/BitcoinLite.Tests.csproj
